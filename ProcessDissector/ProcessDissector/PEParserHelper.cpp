@@ -1116,6 +1116,25 @@ int ParsePEFile(char* lpstrFileName)
 				}
 				else
 				{
+					imThunkData = (PIMAGE_THUNK_DATA)((DWORD)lpFileBase + RVAToOffset(lpFileBase, imImportDescript->FirstThunk));
+					while(imThunkData->u1.AddressOfData != NULL)
+					{
+						if(IMAGE_ORDINAL_FLAG32 == ((DWORD)imThunkData->u1.AddressOfData & IMAGE_ORDINAL_FLAG32))
+						{
+							
+							printf("\tOrdinalNumber=%d\n",((DWORD)imThunkData->u1.AddressOfData & 0x7FFFFFFF));
+
+						}
+						else
+						{
+							imFunNameImport = (PIMAGE_IMPORT_BY_NAME)((DWORD)lpFileBase + RVAToOffset(lpFileBase, imThunkData->u1.Function));
+							
+							printf("\t%s\n", imFunNameImport->Name);
+
+						}
+
+						imThunkData++;
+					}
 
 				}
 				imImportDescript++;
