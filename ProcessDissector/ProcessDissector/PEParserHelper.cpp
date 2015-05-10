@@ -1205,3 +1205,6827 @@ DWORD RVAToOffset(LPVOID lpFileBase, DWORD dwRVA)
 	return _offset;
 }
 
+/*
+Name: DisAssembleBytes32
+Parameters: pbyCode - this is an array containing raw code section
+			nSize - Size of the pbyCode array
+ReturnValue: 0 for success else -1
+Description: This function recieves an array of bytes and converts them into a assembly instructions. This is only for 32 bit applications or PE files
+*/
+int DisAssembleBytes32(BYTE* pbyCode, int nSize)
+{
+	int nReturnValue = 0;
+	int i = 0;
+	int iterator = 0;
+	bool bFoundGroup1prefix = false, bFoundGroup2prefix = false, bFoundGroup3prefix = false, bFoundGroup4prefix = false;
+	bool bTimeToGetOutOfPrefixSearch = false;
+	bool bModRMByteRequired = false;
+	bool bSIBBytesRequired = false;
+	bool bDisplacementRequired = false;
+	bool bImmediateRequired = false;
+	bool bPossible2Or3ByteOpCodes = false;
+	bool bFound0FOpcode = false;
+	BYTE byPrefix[4] = {0x00};
+	
+
+	while(i < nSize)
+	{
+		/*if(pbyCode[i] != 0x00)
+		{
+
+
+		}*/
+
+		//Get the prefix
+		bFoundGroup1prefix = false;
+		bFoundGroup2prefix = false;
+		bFoundGroup3prefix = false;
+		bFoundGroup4prefix = false;
+		bTimeToGetOutOfPrefixSearch = false;
+
+		for(iterator = 0; iterator < 4; iterator++)
+		{
+			byPrefix[iterator] = 0x00;
+		}
+		iterator = 0;
+
+		while(iterator < 4 && i+iterator < nSize && nReturnValue == 0)		//prefix can have at most 4 bytes
+		{
+			switch(pbyCode[i+iterator])
+			{
+			case 0xF0:
+				{
+					if(!bFoundGroup1prefix)
+					{
+						bFoundGroup1prefix = true;
+						byPrefix[iterator] = 0xF0;
+					}
+					else
+					{
+						nReturnValue = -1;	//Already group1 prefix found so another one is present something wrong
+
+					}
+					break;
+				}
+			case 0xF2:
+				{
+					if(!bFoundGroup1prefix)
+					{
+						bFoundGroup1prefix = true;
+						bPossible2Or3ByteOpCodes = true;
+						byPrefix[iterator] = 0xF2;
+					}
+					else
+					{
+						nReturnValue = -1;	//Already group1 prefix found so another one is present something wrong
+
+					}
+					break;
+				}
+			case 0xF3:
+				{
+					if(!bFoundGroup1prefix)
+					{
+						bFoundGroup1prefix = true;
+						bPossible2Or3ByteOpCodes = true;
+						byPrefix[iterator] = 0xF3;
+					}
+					else
+					{
+						nReturnValue = -1;	//Already group1 prefix found so another one is present something wrong
+
+					}
+					break;
+				}
+			case 0x2E:
+				{
+					if(!bFoundGroup2prefix)
+					{
+						bFoundGroup2prefix = true;
+						byPrefix[iterator] = 0x2E;
+					}
+					else
+					{
+						nReturnValue = -1;	//Already group2 prefix found so another one is present something wrong
+
+					}
+					break;
+				}
+			case 0x36:
+				{
+					if(!bFoundGroup2prefix)
+					{
+						bFoundGroup2prefix = true;
+						byPrefix[iterator] = 0x36;
+					}
+					else
+					{
+						nReturnValue = -1;	//Already group2 prefix found so another one is present something wrong
+
+					}
+					break;
+				}
+			case 0x3E:
+				{
+					if(!bFoundGroup2prefix)
+					{
+						bFoundGroup2prefix = true;
+						byPrefix[iterator] = 0x3E;
+					}
+					else
+					{
+						nReturnValue = -1;	//Already group2 prefix found so another one is present something wrong
+
+					}
+					break;
+				}
+			case 0x26:
+				{
+					if(!bFoundGroup2prefix)
+					{
+						bFoundGroup2prefix = true;
+						byPrefix[iterator] = 0x26;
+					}
+					else
+					{
+						nReturnValue = -1;	//Already group2 prefix found so another one is present something wrong
+
+					}
+					break;
+				}
+			case 0x64:
+				{
+					if(!bFoundGroup2prefix)
+					{
+						bFoundGroup2prefix = true;
+					}
+					else
+					{
+						nReturnValue = -1;	//Already group2 prefix found so another one is present something wrong
+
+					}
+					break;
+				}
+			case 0x65:
+				{
+					if(!bFoundGroup2prefix)
+					{
+						bFoundGroup2prefix = true;
+						byPrefix[iterator] = 0x65;
+					}
+					else
+					{
+						nReturnValue = -1;	//Already group2 prefix found so another one is present something wrong
+
+					}
+					break;
+				}
+			case 0x66:
+				{
+					if(!bFoundGroup3prefix)
+					{
+						bFoundGroup3prefix = true;
+						bPossible2Or3ByteOpCodes = true;
+						byPrefix[iterator] = 0x66;
+					}
+					else
+					{
+						nReturnValue = -1;	//Already group3 prefix found so another one is present something wrong
+
+					}
+					break;
+				}
+			case 0x67:
+				{
+					if(!bFoundGroup4prefix)
+					{
+						bFoundGroup4prefix = true;
+						byPrefix[iterator] = 0x67;
+					}
+					else
+					{
+						nReturnValue = -1;	//Already group4 prefix found so another one is present something wrong
+
+					}
+					break;
+				}
+			default:
+				{
+
+					bTimeToGetOutOfPrefixSearch = true;
+					break;
+				}
+				
+			}
+
+			if(!bTimeToGetOutOfPrefixSearch)
+			{
+				iterator++;
+			}
+			else
+			{
+				i += iterator;
+				break;
+			}
+		}
+
+
+		iterator = 0;
+
+		while(iterator < 3 && i+iterator < nSize && nReturnValue == 0)
+		{
+			if(iterator == 0 && pbyCode[i+iterator] == 0x0F)
+			{
+				iterator++;
+				bPossible2Or3ByteOpCodes = true;
+				bFound0FOpcode = true;
+				//Either 2 or 3 byte opcode
+			}
+			else if(bFound0FOpcode && iterator == 1 && pbyCode[i+iterator] == 0x38 || pbyCode[i+iterator] == 0x3A)
+			{
+				iterator++;
+				//This is a 3 byte opcode;
+
+			}
+			else
+			{
+				//This is a 1 byte opcode
+				switch(iterator)
+				{
+				case 0:
+					{
+						break;
+					}
+				case 1:
+					{
+						break;
+					}
+				case 2:
+					{
+						break;
+					}
+				default:
+					{
+						break;
+					}
+				}
+
+			}
+
+
+		}
+
+
+
+
+
+	}
+
+
+	return nReturnValue;
+}
+
+
+int DecodeAdd(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x00:
+		{
+			break;
+		}
+	case 0x01:
+		{
+			break;
+		}
+	case 0x02:
+		{
+			break;
+		}
+	case 0x03:
+		{
+			break;
+		}
+	case 0x04:
+		{
+			break;
+		}
+	case 0x05:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodePushPoP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x06:
+		{
+			break;
+		}
+	case 0x07:
+		{
+			break;
+		}
+	case 0x0E:
+		{
+			break;
+		}
+	case 0x16:
+		{
+			break;
+		}
+	case 0x17:
+		{
+			break;
+		}
+	case 0x1E:
+		{
+			break;
+		}
+	case 0x1F:
+		{
+			break;
+		}
+	case 0x50:
+		{
+			break;
+		}
+	case 0x51:
+		{
+			break;
+		}
+	case 0x52:
+		{
+			break;
+		}
+	case 0x53:
+		{
+			break;
+		}
+	case 0x54:
+		{
+			break;
+		}
+	case 0x55:
+		{
+			break;
+		}
+	case 0x56:
+		{
+			break;
+		}
+	case 0x57:
+		{
+			break;
+		}
+	case 0x58:
+		{
+			break;
+		}
+	case 0x59:
+		{
+			break;
+		}
+	case 0x5A:
+		{
+			break;
+		}
+	case 0x5B:
+		{
+			break;
+		}
+	case 0x5C:
+		{
+			break;
+		}
+	case 0x5D:
+		{
+			break;
+		}
+	case 0x5E:
+		{
+			break;
+		}
+	case 0x5F:
+		{
+			break;
+		}
+	case 0x60:
+		{
+			break;
+		}
+	case 0x61:
+		{
+			break;
+		}
+	case 0x68:
+		{
+			break;
+		}
+	case 0x6A:
+		{
+			break;
+		}
+	case 0x9C:
+		{
+			break;
+		}
+	case 0x9D:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeOR(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x08:
+		{
+			break;
+		}
+	case 0x09:
+		{
+			break;
+		}
+	case 0x0A:
+		{
+			break;
+		}
+	case 0x0B:
+		{
+			break;
+		}
+	case 0x0C:
+		{
+			break;
+		}
+	case 0x0D:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeADC(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x10:
+		{
+			break;
+		}
+	case 0x11:
+		{
+			break;
+		}
+	case 0x12:
+		{
+			break;
+		}
+	case 0x13:
+		{
+			break;
+		}
+	case 0x14:
+		{
+			break;
+		}
+	case 0x15:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeSBB(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x18:
+		{
+			break;
+		}
+	case 0x19:
+		{
+			break;
+		}
+	case 0x1A:
+		{
+			break;
+		}
+	case 0x1B:
+		{
+			break;
+		}
+	case 0x1C:
+		{
+			break;
+		}
+	case 0x1D:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+
+	}
+
+	return nReturnValue;
+}
+
+int DecodeAND(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x20:
+		{
+			break;
+		}
+	case 0x21:
+		{
+			break;
+		}
+	case 0x22:
+		{
+			break;
+		}
+	case 0x23:
+		{
+			break;
+		}
+	case 0x24:
+		{
+			break;
+		}
+	case 0x25:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeDAA(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x27:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeSUB(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x28:
+		{
+			break;
+		}
+	case 0x29:
+		{
+			break;
+		}
+	case 0x2A:
+		{
+			break;
+		}
+	case 0x2B:
+		{
+			break;
+		}
+	case 0x2C:
+		{
+			break;
+		}
+	case 0x2D:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeDAS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x2F:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeXOR(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x30:
+		{
+			break;
+		}
+	case 0x31:
+		{
+			break;
+		}
+	case 0x32:
+		{
+			break;
+		}
+	case 0x33:
+		{
+			break;
+		}
+	case 0x34:
+		{
+			break;
+		}
+	case 0x35:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeAAA(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x37:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeCMP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x38:
+		{
+			break;
+		}
+	case 0x39:
+		{
+			break;
+		}
+	case 0x3A:
+		{
+			break;
+		}
+	case 0x3B:
+		{
+			break;
+		}
+	case 0x3C:
+		{
+			break;
+		}
+	case 0x3D:
+		{
+			break;
+		}
+	case 0xA6:
+		{
+			break;
+		}
+	case 0xA7:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeAAS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x3F:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+
+	}
+
+	return nReturnValue;
+}
+
+int DecodeINC(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x40:
+		{
+			break;
+		}
+	case 0x41:
+		{
+			break;
+		}
+	case 0x42:
+		{
+			break;
+		}
+	case 0x43:
+		{
+			break;
+		}
+	case 0x44:
+		{
+			break;
+		}
+	case 0x45:
+		{
+			break;
+		}
+	case 0x46:
+		{
+			break;
+		}
+	case 0x47:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+	
+	return nReturnValue;
+
+}
+
+int DecodeDEC(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x48:
+		{
+			break;
+		}
+	case 0x49:
+		{
+			break;
+		}
+	case 0x4A:
+		{
+			break;
+		}
+	case 0x4B:
+		{
+			break;
+		}
+	case 0x4C:
+		{
+			break;
+		}
+	case 0x4D:
+		{
+			break;
+		}
+	case 0x4E:
+		{
+			break;
+		}
+	case 0x4F:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+
+int DecodeBOUND(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x62:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeMOV(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+	
+	switch(byOpcode)
+	{
+	case 0x63:
+		{
+			break;
+		}
+	case 0x88:
+		{
+			break;
+		}
+	case 0x89:
+		{
+			break;
+		}
+	case 0x8A:
+		{
+			break;
+		}
+	case 0x8B:
+		{
+			break;
+		}
+	case 0x8C:
+		{
+			break;
+		}
+	case 0x8E:
+		{
+			break;
+		}
+	case 0xA0:
+		{
+			break;
+		}
+	case 0xA1:
+		{
+			break;
+		}
+	case 0xA2:
+		{
+			break;
+		}
+	case 0xA3:
+		{
+			break;
+		}
+	case 0xA4:
+		{
+			break;
+		}
+	case 0xA5:
+		{
+			break;
+		}
+	case 0xB0:
+		{
+			break;
+		}
+	case 0xB1:
+		{
+			break;
+		}
+	case 0xB2:
+		{
+			break;
+		}
+	case 0xB3:
+		{
+			break;
+		}
+	case 0xB4:
+		{
+			break;
+		}
+	case 0xB5:
+		{
+			break;
+		}
+	case 0xB6:
+		{
+			break;
+		}
+	case 0xB7:
+		{
+			break;
+		}
+	case 0xB8:
+		{
+			break;
+		}
+	case 0xB9:
+		{
+			break;
+		}
+	case 0xBA:
+		{
+			break;
+		}
+	case 0xBB:
+		{
+			break;
+		}
+	case 0xBC:
+		{
+			break;
+		}
+	case 0xBD:
+		{
+			break;
+		}
+	case 0xBE:
+		{
+			break;
+		}
+	case 0xBF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeMUL(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x69:
+		{
+			break;
+		}
+	case 0x6B:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeINS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x6C:
+		{
+			break;
+		}
+	case 0x6D:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeOUTS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x6E:
+		{
+			break;
+		}
+	case 0x6F:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeJMP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x70:
+		{
+			break;
+		}
+	case 0x71:
+		{
+			break;
+		}
+	case 0x72:
+		{
+			break;
+		}
+	case 0x73:
+		{
+			break;
+		}
+	case 0x74:
+		{
+			break;
+		}
+	case 0x75:
+		{
+			break;
+		}
+	case 0x76:
+		{
+			break;
+		}
+	case 0x77:
+		{
+			break;
+		}
+	case 0x78:
+		{
+			break;
+		}
+	case 0x79:
+		{
+			break;
+		}
+	case 0x7A:
+		{
+			break;
+		}
+	case 0x7B:
+		{
+			break;
+		}
+	case 0x7C:
+		{
+			break;
+		}
+	case 0x7D:
+		{
+			break;
+		}
+	case 0x7E:
+		{
+			break;
+		}
+	case 0x7F:
+		{
+			break;
+		}
+	case 0xE3:
+		{
+			break;
+		}
+	case 0xE9:
+		{
+			break;
+		}
+	case 0xEA:
+		{
+			break;
+		}
+	case 0xEB:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeGRP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x80:
+		{
+			break;
+		}
+	case 0x81:
+		{
+			break;
+		}
+	case 0x82:
+		{
+			break;
+		}
+	case 0x83:
+		{
+			break;
+		}
+	case 0x8F:
+		{
+			break;
+		}
+	case 0xC0:
+		{
+			break;
+		}
+	case 0xC1:
+		{
+			break;
+		}
+	case 0xC6:
+		{
+			break;
+		}
+	case 0xC7:
+		{
+			break;
+		}
+	case 0xD0:
+		{
+			break;
+		}
+	case 0xD1:
+		{
+			break;
+		}
+	case 0xD2:
+		{
+			break;
+		}
+	case 0xD3:
+		{
+			break;
+		}
+	case 0xF6:
+		{
+			break;
+		}
+	case 0xF7:
+		{
+			break;
+		}
+	case 0xFE:
+		{
+			break;
+		}
+	case 0xFF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeTEST(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x84:
+		{
+			break;
+		}
+	case 0x85:
+		{
+			break;
+		}
+	case 0xA8:
+		{
+			break;
+		}
+	case 0xA9:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeXCHG(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x86:
+		{
+			break;
+		}
+	case 0x87:
+		{
+			break;
+		}
+	case 0x90:
+		{
+			break;
+		}
+	case 0x91:
+		{
+			break;
+		}
+	case 0x92:
+		{
+			break;
+		}
+	case 0x93:
+		{
+			break;
+		}
+	case 0x94:
+		{
+			break;
+		}
+	case 0x95:
+		{
+			break;
+		}
+	case 0x96:
+		{
+			break;
+		}
+	case 0x97:
+		{
+			break;
+		}
+
+	default:
+		{
+			break;
+		}
+
+	}
+
+	return nReturnValue;
+}
+
+int DecodeLEA(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x8D:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+		
+	}
+
+	return nReturnValue;
+}
+
+int DecodeCDQ(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x98:
+		{
+			break;
+		}
+	case 0x99:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeCALL(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x9A:
+		{
+			break;
+		}
+	case 0xE8:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int DecodeWAIT(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x9B:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+
+
+int DecodeSAHF(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x9E:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeLAHF(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x9F:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeSTOS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xAA:
+		{
+			break;
+		}
+	case 0xAB:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeLODS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xAC:
+		{
+			break;
+		}
+	case 0xAD:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeSCAS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xAE:
+		{
+			break;
+		}
+	case 0xAF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeRET(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xC2:
+		{
+			break;
+		}
+	case 0xC3:
+		{
+			break;
+		}
+	case 0xCA:
+		{
+			break;
+		}
+	case 0xCB:
+		{
+			break;
+		}
+	case 0xCF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeLES(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xC4:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeLDS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xC5:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int DecodeENTER(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xC8:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeLEAVE(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xC9:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeINT(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xCC:
+		{
+			break;
+		}
+	case 0xCD:
+		{
+			break;
+		}
+	case 0xCE:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeAAM(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xD4:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeAAD(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xD5:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+
+int DecodeSingeReserved(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xD6:
+		{
+			break;
+		}
+	case 0xF1:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeXLAT(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xD7:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+
+	return nReturnValue;
+}
+
+int DecodeEsc(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xD8:
+		{
+			break;
+		}
+	case 0xD9:
+		{
+			break;
+		}
+	case 0xDA:
+		{
+			break;
+		}
+	case 0xDB:
+		{
+			break;
+		}
+	case 0xDC:
+		{
+			break;
+		}
+	case 0xDD:
+		{
+			break;
+		}
+	case 0xDE:
+		{
+			break;
+		}
+	case 0xDF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeLoop(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xE0:
+		{
+			break;
+		}
+	case 0xE1:
+		{
+			break;
+		}
+	case 0xE2:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeIN(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xE4:
+		{
+			break;
+		}
+	case 0xE5:
+		{
+			break;
+		}
+	case 0xEC:
+		{
+			break;
+		}
+	case 0xED:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeOUT(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xE6:
+		{
+			break;
+		}
+	case 0xE7:
+		{
+			break;
+		}
+	case 0xEE:
+		{
+			break;
+		}
+	case 0xEF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeHLT(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xF4:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeCMC(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xF5:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeCL(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xF8:
+		{
+			break;
+		}
+	case 0xFA:
+		{
+			break;
+		}
+	case 0xFC:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int DecodeST(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xF9:
+		{
+			break;
+		}
+	case 0xFB:
+		{
+			break;
+		}
+	case 0xFD:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2Grp(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x00:
+		{
+			break;
+		}
+	case 0x01:
+		{
+			break;
+		}
+	case 0x18:
+		{
+			break;
+		}
+	case 0x71:
+		{
+			break;
+		}
+	case 0x72:
+		{
+			break;
+		}
+	case 0x73:
+		{
+			break;
+		}
+	case 0xAE:
+		{
+			break;
+		}
+	case 0xB9:
+		{
+			break;
+		}
+	case 0xBA:
+		{
+			break;
+		}
+	case 0xC7:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2LAR(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x02:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2LSL(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x03:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2Reserved(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x04:
+		{
+			break;
+		}
+	case 0x0A:
+		{
+			break;
+		}
+	case 0x0B:
+		{
+			break;
+		}
+	case 0x0C:
+		{
+			break;
+		}
+	case 0x0E:
+		{
+			break;
+		}
+	case 0x0F:
+		{
+			break;
+		}
+	case 0x19:
+		{
+			break;
+		}
+	case 0x1A:
+		{
+			break;
+		}
+	case 0x1B:
+		{
+			break;
+		}
+	case 0x1C:
+		{
+			break;
+		}
+	case 0x1D:
+		{
+			break;
+		}
+	case 0x1E:
+		{
+			break;
+		}
+	case 0x24:
+		{
+			break;
+		}
+	case 0x25:
+		{
+			break;
+		}
+	case 0x26:
+		{
+			break;
+		}
+	case 0x27:
+		{
+			break;
+		}
+	case 0x36:
+		{
+			break;
+		}
+	case 0x39:
+		{
+			break;
+		}
+	case 0x3B:
+		{
+			break;
+		}
+	case 0x3C:
+		{
+			break;
+		}
+	case 0x3D:
+		{
+			break;
+		}
+	case 0x3E:
+		{
+			break;
+		}
+	case 0x3F:
+		{
+			break;
+		}
+	case 0x7A:
+		{
+			break;
+		}
+	case 0x7B:
+		{
+			break;
+		}
+	case 0xA6:
+		{
+			break;
+		}
+	case 0xA7:
+		{
+			break;
+		}
+	case 0xFF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2SYSCALL(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x05:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2CLTS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x06:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2SYSRET(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x07:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2INVD(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x08:
+		{
+			break;
+		}
+	case 0x09:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2PREFETCH(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x0D:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+
+
+int Decode2VUNPCK(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x14:
+		{
+			break;
+		}
+	case 0x15:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2NOP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x1F:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2MOV(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+		case 0x10:
+		{
+			break;
+		}
+	case 0x11:
+		{
+			break;
+		}
+	case 0x12:
+		{
+			break;
+		}	
+	case 0x13:
+		{
+			break;
+		}
+	case 0x16:
+		{
+			break;
+		}
+	case 0x17:
+		{
+			break;
+		}
+	case 0x28:
+		{
+			break;
+		}
+	case 0x29:
+		{
+			break;
+		}
+	case 0x2B:
+		{
+			break;
+		}
+	case 0x50:
+		{
+			break;
+		}
+	case 0x20:
+		{
+			break;
+		}
+	case 0x21:
+		{
+			break;
+		}
+	case 0x22:
+		{
+			break;
+		}
+	case 0x23:
+		{
+			break;
+		}
+	case 0x6E:
+		{
+			break;
+		}
+	case 0x6F:
+		{
+			break;
+		}
+	case 0x7E:
+		{
+			break;
+		}
+	case 0x7F:
+		{
+			break;
+		}
+	case 0xB6:
+		{
+			break;
+		}
+	case 0xB7:
+		{
+			break;
+		}
+	case 0xBE:
+		{
+			break;
+		}
+	case 0xBF:
+		{
+			break;
+		}
+	case 0xC3:
+		{
+			break;
+		}
+	case 0xD6:
+		{
+			break;
+		}
+	case 0xD7:
+		{
+			break;
+		}
+	case 0xE7:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+
+int Decode2CVT(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x2A:
+		{
+			break;
+		}
+	case 0x2C:
+		{
+			break;
+		}
+	case 0x2D:
+		{
+			break;
+		}
+	case 0x5A:
+		{
+			break;
+		}
+	case 0x5B:
+		{
+			break;
+		}
+	case 0xE6:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+
+int Decode2VUCOMIS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x2E:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+
+	return nReturnValue;
+}
+
+int Decode2VCOMIS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+		case 0x2F:
+		{
+			break;
+		}
+		default:
+			{
+				break;
+			}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2WRMSR(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x30:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2RDTSC(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x31:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2RDMSR(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x32:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2RDPMC(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x33:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2SYSENTER(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x34:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2SYSEXIT(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x35:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+}
+
+int Decode2GETSEC(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x37:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2CMOV(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x40:
+		{
+			break;
+		}
+	case 0x41:
+		{
+			break;
+		}
+	case 0x42:
+		{
+			break;
+		}
+	case 0x43:
+		{
+			break;
+		}
+	case 0x44:
+		{
+			break;
+		}
+	case 0x45:
+		{
+			break;
+		}
+	case 0x46:
+		{
+			break;
+		}
+	case 0x47:
+		{
+			break;
+		}
+	case 0x48:
+		{
+			break;
+		}
+	case 0x49:
+		{
+			break;
+		}
+	case 0x4A:
+		{
+			break;
+		}
+	case 0x4B:
+		{
+			break;
+		}
+	case 0x4C:
+		{
+			break;
+		}
+	case 0x4D:
+		{
+			break;
+		}
+	case 0x4E:
+		{
+			break;
+		}
+	case 0x4F:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+
+int Decode2VSQRT(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x51:
+		{
+			break;
+		}
+	case 0x52:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2VRCP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x53:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2AND(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x54:
+		{
+			break;
+		}
+	case 0x55:
+		{
+			break;
+		}
+	case 0xDB:
+		{
+			break;
+		}
+	case 0xDF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2OR(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x56:
+		{
+			break;
+		}
+	case 0x57:
+		{
+			break;
+		}
+	case 0xEB:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2ADD(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x58:
+		{
+			break;
+		}
+	case 0x7C:
+		{
+			break;
+		}
+	case 0xC0:
+		{
+			break;
+		}
+	case 0xC1:
+		{
+			break;
+		}
+	case 0xD0:
+		{
+			break;
+		}
+	case 0xD4:
+		{
+			break;
+		}
+	case 0xDC:
+		{
+			break;
+		}
+	case 0xDD:
+		{
+			break;
+		}
+	case 0xEC:
+		{
+			break;
+		}
+	case 0xED:
+		{
+			break;
+		}
+	case 0xF5:
+		{
+			break;
+		}
+	case 0xFC:
+		{
+			break;
+		}
+	case 0xFD:
+		{
+			break;
+		}
+	case 0xFE:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+
+
+
+int Decode2MUL(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x59:
+		{
+			break;
+		}
+	case 0xAF:
+		{
+			break;
+		}
+	case 0xD5:
+		{
+			break;
+		}
+	case 0xE4:
+		{
+			break;
+		}
+	case 0xE5:
+		{
+			break;
+		}
+	case 0xF4:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+
+int Decode2SUB(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x5C:
+		{
+			break;
+		}
+	case 0x7D:
+		{
+			break;
+		}
+	case 0xD8:
+		{
+			break;
+		}
+	case 0xD9:
+		{
+			break;
+		}
+	case 0xE8:
+		{
+			break;
+		}
+	case 0xE9:
+		{
+			break;
+		}
+	case 0xF8:
+		{
+			break;
+		}
+	case 0xF9:
+		{
+			break;
+		}
+	case 0xFA:
+		{
+			break;
+		}
+	case 0xFB:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2MIN(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x5D:
+		{
+			break;
+		}
+	case 0xDA:
+		{
+			break;
+		}
+	case 0xEA:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2DIV(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x5E:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2MAX(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x5F:
+		{
+			break;
+		}
+	case 0xDE:
+		{
+			break;
+		}
+	case 0xEE:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+
+int Decode2PUNPCK(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x60:
+		{
+			break;
+		}
+	case 0x61:
+		{
+			break;
+		}
+	case 0x62:
+		{
+			break;
+		}
+	case 0x68:
+		{
+			break;
+		}
+	case 0x69:
+		{
+			break;
+		}
+	case 0x6A:
+		{
+			break;
+		}
+	case 0x6C:
+		{
+			break;
+		}
+	case 0x6D:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2PACK(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x63:
+		{
+			break;
+		}
+	case 0x67:
+		{
+			break;
+		}
+	case 0x6B:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+
+int Decode2PCMP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x64:
+		{
+			break;
+		}
+	case 0x65:
+		{
+			break;
+		}
+	case 0x66:
+		{
+			break;
+		}
+	case 0x74:
+		{
+			break;
+		}
+	case 0x75:
+		{
+			break;
+		}
+	case 0x76:
+		{
+			break;
+		}
+	case 0xC2:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2VPSHU(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x70:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2EMMS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x77:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+
+int Decode2VMREAD(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x78:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2VMWRITE(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x79:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2JMP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x80:
+		{
+			break;
+		}
+	case 0x81:
+		{
+			break;
+		}
+	case 0x82:
+		{
+			break;
+		}
+	case 0x83:
+		{
+			break;
+		}
+	case 0x84:
+		{
+			break;
+		}
+	case 0x85:
+		{
+			break;
+		}
+	case 0x86:
+		{
+			break;
+		}
+	case 0x87:
+		{
+			break;
+		}
+	case 0x88:
+		{
+			break;
+		}
+	case 0x89:
+		{
+			break;
+		}
+	case 0x8A:
+		{
+			break;
+		}
+	case 0x8B:
+		{
+			break;
+		}
+	case 0x8C:
+		{
+			break;
+		}
+	case 0x8D:
+		{
+			break;
+		}
+	case 0x8E:
+		{
+			break;
+		}
+	case 0x8F:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2SET(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x90:
+		{
+			break;
+		}
+	case 0x91:
+		{
+			break;
+		}
+	case 0x92:
+		{
+			break;
+		}
+	case 0x93:
+		{
+			break;
+		}
+	case 0x94:
+		{
+			break;
+		}
+	case 0x95:
+		{
+			break;
+		}
+	case 0x96:
+		{
+			break;
+		}
+	case 0x97:
+		{
+			break;
+		}
+	case 0x98:
+		{
+			break;
+		}
+	case 0x99:
+		{
+			break;
+		}
+	case 0x9A:
+		{
+			break;
+		}
+	case 0x9B:
+		{
+			break;
+		}
+	case 0x9C:
+		{
+			break;
+		}
+	case 0x9D:
+		{
+			break;
+		}
+	case 0x9E:
+		{
+			break;
+		}
+	case 0x9F:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+
+int Decode2PUSH(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xA0:
+		{
+			break;
+		}
+	case 0xA8:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2POP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xA1:
+		{
+			break;
+		}
+	case 0xA9:
+		{
+			break;
+		}
+	case 0xB8:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2CPUID(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xA2:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2BT(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xA3:
+		{
+			break;
+		}
+	case 0xAB:
+		{
+			break;
+		}
+	case 0xB3:
+		{
+			break;
+		}
+	case 0xBB:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2SHLD(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xA4:
+		{
+			break;
+		}
+	case 0xA5:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2RSM(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xAA:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2SHRD(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xAC:
+		{
+			break;
+		}
+	case 0xAD:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2CMPXCHG(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xB0:
+		{
+			break;
+		}
+	case 0xB1:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2LSS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xB2:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2LFS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xB4:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2LGS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xB5:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2BS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xBC:
+		{
+			break;
+		}
+	case 0xBD:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2INSRW(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xC4:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2EXTRW(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xC5:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2SHUF(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xC6:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2BSWAP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xC8:
+		{
+			break;
+		}
+	case 0xC9:
+		{
+			break;
+		}
+	case 0xCA:
+		{
+			break;
+		}
+	case 0xCB:
+		{
+			break;
+		}
+	case 0xCC:
+		{
+			break;
+		}
+	case 0xCD:
+		{
+			break;
+		}
+	case 0xCE:
+		{
+			break;
+		}
+	case 0xCF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2SRL(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xD1:
+		{
+			break;
+		}
+	case 0xD2:
+		{
+			break;
+		}
+	case 0xD3:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2AVG(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xE0:
+		{
+			break;
+		}
+	case 0xE3:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2SRA(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xE1:
+		{
+			break;
+		}
+	case 0xE2:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2XOR(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xEF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2LDD(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xF0:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2SLL(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xF1:
+		{
+			break;
+		}
+	case 0xF2:
+		{
+			break;
+		}
+	case 0xF3:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2SAD(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xF6:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode2MASK(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xF7:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1PSHU(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x00:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1ADD(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x01:
+		{
+			break;
+		}
+	case 0x02:
+		{
+			break;
+		}
+	case 0x03:
+		{
+			break;
+		}
+	case 0x04:
+		{
+			break;
+		}
+	case 0x96:
+		{
+			break;
+		}
+	case 0x98:
+		{
+			break;
+		}
+	case 0x99:
+		{
+			break;
+		}
+	case 0x9C:
+		{
+			break;
+		}
+	case 0x9D:
+		{
+			break;
+		}
+	case 0xA6:
+		{
+			break;
+		}
+	case 0xB6:
+		{
+			break;
+		}
+	case 0xA8:
+		{
+			break;
+		}
+	case 0xA9:
+		{
+			break;
+		}
+	case 0xB8:
+		{
+			break;
+		}
+	case 0xB9:
+		{
+			break;
+		}
+	case 0xAC:
+		{
+			break;
+		}
+	case 0xAD:
+		{
+			break;
+		}
+	case 0xBC:
+		{
+			break;
+		}
+	case 0xBD:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1SUB(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x05:
+		{
+			break;
+		}
+	case 0x06:
+		{
+			break;
+		}
+	case 0x07:
+		{
+			break;
+		}
+	case 0x97:
+		{
+			break;
+		}
+	case 0x9A:
+		{
+			break;
+		}
+	case 0x9B:
+		{
+			break;
+		}
+	case 0x9E:
+		{
+			break;
+		}
+	case 0x9F:
+		{
+			break;
+		}
+	case 0xA7:
+		{
+			break;
+		}
+	case 0xB7:
+		{
+			break;
+		}
+	case 0xAA:
+		{
+			break;
+		}
+	case 0xAB:
+		{
+			break;
+		}
+	case 0xBA:
+		{
+			break;
+		}
+	case 0xBB:
+		{
+			break;
+		}
+	case 0xBE:
+		{
+			break;
+		}
+	case 0xBF:
+		{
+			break;
+		}
+	case 0xAE:
+		{
+			break;
+		}
+	case 0xAF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1SIGN(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x08:
+		{
+			break;
+		}
+	case 0x09:
+		{
+			break;
+		}
+	case 0x0A:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1MUL(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x0B:
+		{
+			break;
+		}
+	case 0x28:
+		{
+			break;
+		}
+	case 0x40:
+		{
+			break;
+		}
+	case 0xF6:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1MIL(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x0C:
+		{
+			break;
+		}
+	case 0x0D:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+
+
+int Decode3_1TEST(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x0E:
+		{
+			break;
+		}
+	case 0x0F:
+		{
+			break;
+		}
+	case 0x17:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1BLEND(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x10:
+		{
+			break;
+		}
+	case 0x14:
+		{
+			break;
+		}
+	case 0x15:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1RESERVED(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x11:
+		{
+			break;
+		}
+	case 0x12:
+		{
+			break;
+		}
+	case 0x1B:
+		{
+			break;
+		}
+	case 0x1F:
+		{
+			break;
+		}
+	case 0x26:
+		{
+			break;
+		}
+	case 0x27:
+		{
+			break;
+		}
+	case 0x42:
+		{
+			break;
+		}
+	case 0x43:
+		{
+			break;
+		}
+	case 0x44:
+		{
+			break;
+		}
+	case 0x48:
+		{
+			break;
+		}
+	case 0x49:
+		{
+			break;
+		}
+	case 0x4A:
+		{
+			break;
+		}
+	case 0x4B:
+		{
+			break;
+		}
+	case 0x4C:
+		{
+			break;
+		}
+	case 0x4D:
+		{
+			break;
+		}
+	case 0x4E:
+		{
+			break;
+		}
+	case 0x4F:
+		{
+			break;
+		}
+	case 0x50:
+		{
+			break;
+		}
+	case 0x51:
+		{
+			break;
+		}
+	case 0x52:
+		{
+			break;
+		}
+	case 0x53:
+		{
+			break;
+		}
+	case 0x54:
+		{
+			break;
+		}
+	case 0x55:
+		{
+			break;
+		}
+	case 0x56:
+		{
+			break;
+		}
+	case 0x57:
+		{
+			break;
+		}
+	case 0x5B:
+		{
+			break;
+		}
+	case 0x5C:
+		{
+			break;
+		}
+	case 0x5D:
+		{
+			break;
+		}
+	case 0x5E:
+		{
+			break;
+		}
+	case 0x5F:
+		{
+			break;
+		}
+	case 0x60:
+		{
+			break;
+		}
+	case 0x61:
+		{
+			break;
+		}
+	case 0x62:
+		{
+			break;
+		}
+	case 0x63:
+		{
+			break;
+		}
+	case 0x64:
+		{
+			break;
+		}
+	case 0x65:
+		{
+			break;
+		}
+	case 0x66:
+		{
+			break;
+		}
+	case 0x67:
+		{
+			break;
+		}
+	case 0x68:
+		{
+			break;
+		}
+	case 0x69:
+		{
+			break;
+		}
+	case 0x6A:
+		{
+			break;
+		}
+	case 0x6B:
+		{
+			break;
+		}
+	case 0x6C:
+		{
+			break;
+		}
+	case 0x6D:
+		{
+			break;
+		}
+	case 0x6E:
+		{
+			break;
+		}
+	case 0x6F:
+		{
+			break;
+		}
+	case 0x70:
+		{
+			break;
+		}
+	case 0x71:
+		{
+			break;
+		}
+	case 0x72:
+		{
+			break;
+		}
+	case 0x73:
+		{
+			break;
+		}
+	case 0x74:
+		{
+			break;
+		}
+	case 0x75:
+		{
+			break;
+		}
+	case 0x76:
+		{
+			break;
+		}
+	case 0x77:
+		{
+			break;
+		}
+	case 0x7A:
+		{
+			break;
+		}
+	case 0x7B:
+		{
+			break;
+		}
+	case 0x7C:
+		{
+			break;
+		}
+	case 0x7D:
+		{
+			break;
+		}
+	case 0x7E:
+		{
+			break;
+		}
+	case 0x7F:
+		{
+			break;
+		}
+	case 0x83:
+		{
+			break;
+		}
+	case 0x84:
+		{
+			break;
+		}
+	case 0x85:
+		{
+			break;
+		}
+	case 0x86:
+		{
+			break;
+		}
+	case 0x87:
+		{
+			break;
+		}
+	case 0x88:
+		{
+			break;
+		}
+	case 0x89:
+		{
+			break;
+		}
+	case 0x8A:
+		{
+			break;
+		}
+	case 0x8B:
+		{
+			break;
+		}
+	case 0x8D:
+		{
+			break;
+		}
+	case 0x8F:
+		{
+			break;
+		}
+	case 0x94:
+		{
+			break;
+		}
+	case 0x95:
+		{
+			break;
+		}
+	case 0xA0:
+		{
+			break;
+		}
+	case 0xA1:
+		{
+			break;
+		}
+	case 0xA2:
+		{
+			break;
+		}
+	case 0xA3:
+		{
+			break;
+		}
+	case 0xA4:
+		{
+			break;
+		}
+	case 0xA5:
+		{
+			break;
+		}
+	case 0xB0:
+		{
+			break;
+		}
+	case 0xB1:
+		{
+			break;
+		}
+	case 0xB2:
+		{
+			break;
+		}
+	case 0xB3:
+		{
+			break;
+		}
+	case 0xB4:
+		{
+			break;
+		}
+	case 0xB5:
+		{
+			break;
+		}
+	case 0xC0:
+		{
+			break;
+		}
+	case 0xC1:
+		{
+			break;
+		}
+	case 0xC2:
+		{
+			break;
+		}
+	case 0xC3:
+		{
+			break;
+		}
+	case 0xC4:
+		{
+			break;
+		}
+	case 0xC5:
+		{
+			break;
+		}
+	case 0xC6:
+		{
+			break;
+		}
+	case 0xC7:
+		{
+			break;
+		}
+	case 0xD0:
+		{
+			break;
+		}
+	case 0xD1:
+		{
+			break;
+		}
+	case 0xD2:
+		{
+			break;
+		}
+	case 0xD3:
+		{
+			break;
+		}
+	case 0xD4:
+		{
+			break;
+		}
+	case 0xD5:
+		{
+			break;
+		}
+	case 0xD6:
+		{
+			break;
+		}
+	case 0xD7:
+		{
+			break;
+		}
+	case 0xE0:
+		{
+			break;
+		}
+	case 0xE1:
+		{
+			break;
+		}
+	case 0xE2:
+		{
+			break;
+		}
+	case 0xE3:
+		{
+			break;
+		}
+	case 0xE4:
+		{
+			break;
+		}
+	case 0xE5:
+		{
+			break;
+		}
+	case 0xE6:
+		{
+			break;
+		}
+	case 0xE7:
+		{
+			break;
+		}
+	case 0xC8:
+		{
+			break;
+		}
+	case 0xC9:
+		{
+			break;
+		}
+	case 0xCA:
+		{
+			break;
+		}
+	case 0xCB:
+		{
+			break;
+		}
+	case 0xCC:
+		{
+			break;
+		}
+	case 0xCD:
+		{
+			break;
+		}
+	case 0xCE:
+		{
+			break;
+		}
+	case 0xCF:
+		{
+			break;
+		}
+	case 0xE8:
+		{
+			break;
+		}
+	case 0xE9:
+		{
+			break;
+		}
+	case 0xEA:
+		{
+			break;
+		}
+	case 0xEB:
+		{
+			break;
+		}
+	case 0xEC:
+		{
+			break;
+		}
+	case 0xED:
+		{
+			break;
+		}
+	case 0xEE:
+		{
+			break;
+		}
+	case 0xEF:
+		{
+			break;
+		}
+	case 0xD8:
+		{
+			break;
+		}
+	case 0xD9:
+		{
+			break;
+		}
+	case 0xDA:
+		{
+			break;
+		}
+	case 0xF8:
+		{
+			break;
+		}
+	case 0xF9:
+		{
+			break;
+		}
+	case 0xFA:
+		{
+			break;
+		}
+	case 0xFB:
+		{
+			break;
+		}
+	case 0xFC:
+		{
+			break;
+		}
+	case 0xFD:
+		{
+			break;
+		}
+	case 0xFE:
+		{
+			break;
+		}
+	case 0xFF:
+		{
+			break;
+		}
+	case 0xF4:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1CVT(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x13:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+
+int Decode3_1RMP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x16:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1BROADCAST(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x18:
+		{
+			break;
+		}
+	case 0x19:
+		{
+			break;
+		}
+	case 0x1A:
+		{
+			break;
+		}
+	case 0x58:
+		{
+			break;
+		}
+	case 0x59:
+		{
+			break;
+		}
+	case 0x5A:
+		{
+			break;
+		}
+	case 0x78:
+		{
+			break;
+		}
+	case 0x79:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1ABS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x1C:
+		{
+			break;
+		}
+	case 0x1D:
+		{
+			break;
+		}
+	case 0x1E:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1MOV(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x20:
+		{
+			break;
+		}
+	case 0x21:
+		{
+			break;
+		}
+	case 0x22:
+		{
+			break;
+		}
+	case 0x23:
+		{
+			break;
+		}
+	case 0x24:
+		{
+			break;
+		}
+	case 0x25:
+		{
+			break;
+		}
+	case 0x2A:
+		{
+			break;
+		}
+	case 0x2C:
+		{
+			break;
+		}
+	case 0x2D:
+		{
+			break;
+		}
+	case 0x2E:
+		{
+			break;
+		}
+	case 0x2F:
+		{
+			break;
+		}
+	case 0x30:
+		{
+			break;
+		}
+	case 0x31:
+		{
+			break;
+		}
+	case 0x32:
+		{
+			break;
+		}
+	case 0x33:
+		{
+			break;
+		}
+	case 0x34:
+		{
+			break;
+		}
+	case 0x35:
+		{
+			break;
+		}
+	case 0x8C:
+		{
+			break;
+		}
+	case 0x8E:
+		{
+			break;
+		}
+	case 0xF0:
+		{
+			break;
+		}
+	case 0xF1:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1CMP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x37:
+		{
+			break;
+		}
+	case 0x29:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1PACK(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x2B:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1RMD(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x36:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1MIN(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x38:
+		{
+			break;
+		}
+	case 0x39:
+		{
+			break;
+		}
+	case 0x3A:
+		{
+			break;
+		}
+	case 0x3B:
+		{
+			break;
+		}
+	case 0x41:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1MAX(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x3C:
+		{
+			break;
+		}
+	case 0x3D:
+		{
+			break;
+		}
+	case 0x3E:
+		{
+			break;
+		}
+	case 0x3F:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1SRUnique(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x45:
+		{
+			break;
+		}
+	case 0x46:
+		{
+			break;
+		}
+	case 0x47:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1INV(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x80:
+		{
+			break;
+		}
+	case 0x81:
+		{
+			break;
+		}
+	case 0x82:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1GATHER(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x90:
+		{
+			break;
+		}
+	case 0x91:
+		{
+			break;
+		}
+	case 0x92:
+		{
+			break;
+		}
+	case 0x93:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1AES(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xDB:
+		{
+			break;
+		}
+	case 0xDC:
+		{
+			break;
+		}
+	case 0xDD:
+		{
+			break;
+		}
+	case 0xDE:
+		{
+			break;
+		}
+	case 0xDF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1AND(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xF2:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1GRP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xF3:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+
+int Decode3_1BZH(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xF5:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_1BEXT(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xF7:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2PERM(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x00:
+		{
+			break;
+		}
+	case 0x01:
+		{
+			break;
+		}
+	case 0x04:
+		{
+			break;
+		}
+	case 0x05:
+		{
+			break;
+		}
+	case 0x06:
+		{
+			break;
+		}
+	case 0x46:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2BLEND(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x02:
+		{
+			break;
+		}
+	case 0x0C:
+		{
+			break;
+		}
+	case 0x0D:
+		{
+			break;
+		}
+	case 0x0E:
+		{
+			break;
+		}
+	case 0x4A:
+		{
+			break;
+		}
+	case 0x4B:
+		{
+			break;
+		}
+	case 0x4C:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2RESERVED(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x03:
+		{
+			break;
+		}
+	case 0x07:
+		{
+			break;
+		}
+	case 0x10:
+		{
+			break;
+		}
+	case 0x11:
+		{
+			break;
+		}
+	case 0x12:
+		{
+			break;
+		}
+	case 0x13:
+		{
+			break;
+		}
+	case 0x1A:
+		{
+			break;
+		}
+	case 0x1B:
+		{
+			break;
+		}
+	case 0x1C:
+		{
+			break;
+		}
+	case 0x1E:
+		{
+			break;
+		}
+	case 0x1F:
+		{
+			break;
+		}
+	case 0x23:
+		{
+			break;
+		}
+	case 0x24:
+		{
+			break;
+		}
+	case 0x25:
+		{
+			break;
+		}
+	case 0x26:
+		{
+			break;
+		}
+	case 0x27:
+		{
+			break;
+		}
+	case 0x28:
+		{
+			break;
+		}
+	case 0x29:
+		{
+			break;
+		}
+	case 0x2A:
+		{
+			break;
+		}
+	case 0x2B:
+		{
+			break;
+		}
+	case 0x2C:
+		{
+			break;
+		}
+	case 0x2D:
+		{
+			break;
+		}
+	case 0x2E:
+		{
+			break;
+		}
+	case 0x2F:
+		{
+			break;
+		}
+	case 0x30:
+		{
+			break;
+		}
+	case 0x31:
+		{
+			break;
+		}
+	case 0x32:
+		{
+			break;
+		}
+	case 0x33:
+		{
+			break;
+		}
+	case 0x34:
+		{
+			break;
+		}
+	case 0x35:
+		{
+			break;
+		}
+	case 0x36:
+		{
+			break;
+		}
+	case 0x37:
+		{
+			break;
+		}
+	case 0x3A:
+		{
+			break;
+		}
+	case 0x3B:
+		{
+			break;
+		}
+	case 0x3C:
+		{
+			break;
+		}
+	case 0x3D:
+		{
+			break;
+		}
+	case 0x3E:
+		{
+			break;
+		}
+	case 0x3F:
+		{
+			break;
+		}
+	case 0x43:
+		{
+			break;
+		}
+	case 0x45:
+		{
+			break;
+		}
+	case 0x47:
+		{
+			break;
+		}
+	case 0x48:
+		{
+			break;
+		}
+	case 0x49:
+		{
+			break;
+		}
+	case 0x4D:
+		{
+			break;
+		}
+	case 0x4E:
+		{
+			break;
+		}
+	case 0x4F:
+		{
+			break;
+		}
+	case 0x50:
+		{
+			break;
+		}
+	case 0x51:
+		{
+			break;
+		}
+	case 0x52:
+		{
+			break;
+		}
+	case 0x53:
+		{
+			break;
+		}
+	case 0x54:
+		{
+			break;
+		}
+	case 0x55:
+		{
+			break;
+		}
+	case 0x56:
+		{
+			break;
+		}
+	case 0x57:
+		{
+			break;
+		}
+	case 0x58:
+		{
+			break;
+		}
+	case 0x59:
+		{
+			break;
+		}
+	case 0x5A:
+		{
+			break;
+		}
+	case 0x5B:
+		{
+			break;
+		}
+	case 0x5C:
+		{
+			break;
+		}
+	case 0x5D:
+		{
+			break;
+		}
+	case 0x5E:
+		{
+			break;
+		}
+	case 0x5F:
+		{
+			break;
+		}
+	case 0x64:
+		{
+			break;
+		}
+	case 0x65:
+		{
+			break;
+		}
+	case 0x66:
+		{
+			break;
+		}
+	case 0x67:
+		{
+			break;
+		}
+	case 0x68:
+		{
+			break;
+		}
+	case 0x69:
+		{
+			break;
+		}
+	case 0x6A:
+		{
+			break;
+		}
+	case 0x6B:
+		{
+			break;
+		}
+	case 0x6C:
+		{
+			break;
+		}
+	case 0x6D:
+		{
+			break;
+		}
+	case 0x6E:
+		{
+			break;
+		}
+	case 0x6F:
+		{
+			break;
+		}
+	case 0x70:
+		{
+			break;
+		}
+	case 0x71:
+		{
+			break;
+		}
+	case 0x72:
+		{
+			break;
+		}
+	case 0x73:
+		{
+			break;
+		}
+	case 0x74:
+		{
+			break;
+		}
+	case 0x75:
+		{
+			break;
+		}
+	case 0x76:
+		{
+			break;
+		}
+	case 0x77:
+		{
+			break;
+		}
+	case 0x78:
+		{
+			break;
+		}
+	case 0x79:
+		{
+			break;
+		}
+	case 0x7A:
+		{
+			break;
+		}
+	case 0x7B:
+		{
+			break;
+		}
+	case 0x7C:
+		{
+			break;
+		}
+	case 0x7D:
+		{
+			break;
+		}
+	case 0x7E:
+		{
+			break;
+		}
+	case 0x7F:
+		{
+			break;
+		}
+	case 0x80:
+		{
+			break;
+		}
+	case 0x81:
+		{
+			break;
+		}
+	case 0x82:
+		{
+			break;
+		}
+	case 0x83:
+		{
+			break;
+		}
+	case 0x84:
+		{
+			break;
+		}
+	case 0x85:
+		{
+			break;
+		}
+	case 0x86:
+		{
+			break;
+		}
+	case 0x87:
+		{
+			break;
+		}
+	case 0x88:
+		{
+			break;
+		}
+	case 0x89:
+		{
+			break;
+		}
+	case 0x8A:
+		{
+			break;
+		}
+	case 0x8B:
+		{
+			break;
+		}
+	case 0x8C:
+		{
+			break;
+		}
+	case 0x8D:
+		{
+			break;
+		}
+	case 0x8E:
+		{
+			break;
+		}
+	case 0x8F:
+		{
+			break;
+		}
+	case 0x90:
+		{
+			break;
+		}
+	case 0x91:
+		{
+			break;
+		}
+	case 0x92:
+		{
+			break;
+		}
+	case 0x93:
+		{
+			break;
+		}
+	case 0x94:
+		{
+			break;
+		}
+	case 0x95:
+		{
+			break;
+		}
+	case 0x96:
+		{
+			break;
+		}
+	case 0x97:
+		{
+			break;
+		}
+	case 0x98:
+		{
+			break;
+		}
+	case 0x99:
+		{
+			break;
+		}
+	case 0x9A:
+		{
+			break;
+		}
+	case 0x9B:
+		{
+			break;
+		}
+	case 0x9C:
+		{
+			break;
+		}
+	case 0x9D:
+		{
+			break;
+		}
+	case 0x9E:
+		{
+			break;
+		}
+	case 0x9F:
+		{
+			break;
+		}
+	case 0xA0:
+		{
+			break;
+		}
+	case 0xA1:
+		{
+			break;
+		}
+	case 0xA2:
+		{
+			break;
+		}
+	case 0xA3:
+		{
+			break;
+		}
+	case 0xA4:
+		{
+			break;
+		}
+	case 0xA5:
+		{
+			break;
+		}
+	case 0xA6:
+		{
+			break;
+		}
+	case 0xA7:
+		{
+			break;
+		}
+	case 0xA8:
+		{
+			break;
+		}
+	case 0xA9:
+		{
+			break;
+		}
+	case 0xAA:
+		{
+			break;
+		}
+	case 0xAB:
+		{
+			break;
+		}
+	case 0xAC:
+		{
+			break;
+		}
+	case 0xAD:
+		{
+			break;
+		}
+	case 0xAE:
+		{
+			break;
+		}
+	case 0xAF:
+		{
+			break;
+		}
+	case 0xB0:
+		{
+			break;
+		}
+	case 0xB1:
+		{
+			break;
+		}
+	case 0xB2:
+		{
+			break;
+		}
+	case 0xB3:
+		{
+			break;
+		}
+	case 0xB4:
+		{
+			break;
+		}
+	case 0xB5:
+		{
+			break;
+		}
+	case 0xB6:
+		{
+			break;
+		}
+	case 0xB7:
+		{
+			break;
+		}
+	case 0xB8:
+		{
+			break;
+		}
+	case 0xB9:
+		{
+			break;
+		}
+	case 0xBA:
+		{
+			break;
+		}
+	case 0xBB:
+		{
+			break;
+		}
+	case 0xBC:
+		{
+			break;
+		}
+	case 0xBD:
+		{
+			break;
+		}
+	case 0xBE:
+		{
+			break;
+		}
+	case 0xBF:
+		{
+			break;
+		}
+	case 0xC0:
+		{
+			break;
+		}
+	case 0xC1:
+		{
+			break;
+		}
+	case 0xC2:
+		{
+			break;
+		}
+	case 0xC3:
+		{
+			break;
+		}
+	case 0xC4:
+		{
+			break;
+		}
+	case 0xC5:
+		{
+			break;
+		}
+	case 0xC6:
+		{
+			break;
+		}
+	case 0xC7:
+		{
+			break;
+		}
+	case 0xC8:
+		{
+			break;
+		}
+	case 0xC9:
+		{
+			break;
+		}
+	case 0xCA:
+		{
+			break;
+		}
+	case 0xCB:
+		{
+			break;
+		}
+	case 0xCC:
+		{
+			break;
+		}
+	case 0xCD:
+		{
+			break;
+		}
+	case 0xCE:
+		{
+			break;
+		}
+	case 0xCF:
+		{
+			break;
+		}
+	case 0xD0:
+		{
+			break;
+		}
+	case 0xD1:
+		{
+			break;
+		}
+	case 0xD2:
+		{
+			break;
+		}
+	case 0xD3:
+		{
+			break;
+		}
+	case 0xD4:
+		{
+			break;
+		}
+	case 0xD5:
+		{
+			break;
+		}
+	case 0xD6:
+		{
+			break;
+		}
+	case 0xD7:
+		{
+			break;
+		}
+	case 0xD8:
+		{
+			break;
+		}
+	case 0xD9:
+		{
+			break;
+		}
+	case 0xDA:
+		{
+			break;
+		}
+	case 0xDB:
+		{
+			break;
+		}
+	case 0xDC:
+		{
+			break;
+		}
+	case 0xDD:
+		{
+			break;
+		}
+	case 0xDE:
+		{
+			break;
+		}
+	case 0xE0:
+		{
+			break;
+		}
+	case 0xE1:
+		{
+			break;
+		}
+	case 0xE2:
+		{
+			break;
+		}
+	case 0xE3:
+		{
+			break;
+		}
+	case 0xE4:
+		{
+			break;
+		}
+	case 0xE5:
+		{
+			break;
+		}
+	case 0xE6:
+		{
+			break;
+		}
+	case 0xE7:
+		{
+			break;
+		}
+	case 0xE8:
+		{
+			break;
+		}
+	case 0xE9:
+		{
+			break;
+		}
+	case 0xEA:
+		{
+			break;
+		}
+	case 0xEB:
+		{
+			break;
+		}
+	case 0xEC:
+		{
+			break;
+		}
+	case 0xED:
+		{
+			break;
+		}
+	case 0xEE:
+		{
+			break;
+		}
+	case 0xEF:
+		{
+			break;
+		}
+	case 0xF1:
+		{
+			break;
+		}
+	case 0xF2:
+		{
+			break;
+		}
+	case 0xF3:
+		{
+			break;
+		}
+	case 0xF4:
+		{
+			break;
+		}
+	case 0xF5:
+		{
+			break;
+		}
+	case 0xF6:
+		{
+			break;
+		}
+	case 0xF7:
+		{
+			break;
+		}
+	case 0xF8:
+		{
+			break;
+		}
+	case 0xF9:
+		{
+			break;
+		}
+	case 0xFA:
+		{
+			break;
+		}
+	case 0xFB:
+		{
+			break;
+		}
+	case 0xFC:
+		{
+			break;
+		}
+	case 0xFD:
+		{
+			break;
+		}
+	case 0xFE:
+		{
+			break;
+		}
+	case 0xFF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2ROUND(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x08:
+		{
+			break;
+		}
+	case 0x09:
+		{
+			break;
+		}
+	case 0x0A:
+		{
+			break;
+		}
+	case 0x0B:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2ALIGN(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x0F:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2EXT(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x14:
+		{
+			break;
+		}
+	case 0x15:
+		{
+			break;
+		}
+	case 0x16:
+		{
+			break;
+		}
+	case 0x17:
+		{
+			break;
+		}
+	case 0x19:
+		{
+			break;
+		}
+	case 0x39:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2INS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x18:
+		{
+			break;
+		}
+	case 0x20:
+		{
+			break;
+		}
+	case 0x21:
+		{
+			break;
+		}
+	case 0x22:
+		{
+			break;
+		}
+	case 0x38:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2CVT(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x1D:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2PPS(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x40:
+		{
+			break;
+		}
+	case 0x41:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2SAD(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x42:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2MUL(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x44:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2CMP(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0x60:
+		{
+			break;
+		}
+	case 0x61:
+		{
+			break;
+		}
+	case 0x62:
+		{
+			break;
+		}
+	case 0x63:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2VAESKEYGEN(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xDF:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+int Decode3_2ROR(BYTE byOpcode, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+
+	switch(byOpcode)
+	{
+	case 0xF0:
+		{
+			break;
+		}
+	default:
+		{
+			break;
+		}
+	}
+
+	return nReturnValue;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
