@@ -7,6 +7,25 @@
 
 #include "PEParserHelper.h"
 
+typedef int (*pt2Function)(BYTE byOpcode, BYTE* byarPrefix);
+pt2Function DecodeFunctions[256] = {NULL};
+pt2Function DecodeFunctions_2[256] = {NULL};
+pt2Function DecodeFunctions_3[256] = {NULL};
+
+char** archREGFields_8 = {NULL};
+char** archREGFields_16 = {NULL};
+char** archREGFields_32 = {NULL};
+char** archREGFields_mm = {NULL};
+char** archREGFields_xmm = {NULL};
+
+char** archMODRMFields_16 = {NULL};
+char** archMODRMFields_32 = {NULL};
+//char** archMODRMFields_2 = {NULL};
+
+
+
+
+
 
 
 /*
@@ -1486,14 +1505,470 @@ int DisAssembleBytes32(BYTE* pbyCode, int nSize)
 }
 
 
-int DecodeAdd(BYTE byOpcode, BYTE* byarPrefix)
+
+/*
+*Name: InitializeDissassemblyEngine
+*Description: This function initializes the dissassembly engine. It files the function pointer array which will be used during dissassembling code sections
+*Return: 0 For success, else some error has occurred
+*/
+int InitializeDissassemblyEngine()
 {
 	int nReturnValue = 0;
+
+	/*pt2Function DecodeFunctions[256] = {NULL};
+	pt2Function DecodeFunctions_2[256] = {NULL};
+	pt2Function DecodeFunctions_3[256] = {NULL};*/
+
+	DecodeFunctions[0] = &DecodeADD;
+
+
+	/*char** archREGFields_8 = {NULL};
+	char** archREGFields_16 = {NULL};
+	char** archREGFields_32 = {NULL};
+	char** archREGFields_mm = {NULL};
+	char** archREGFields_xmm = {NULL};*/
+
+	/*char** archMODRMFields_16 = {NULL};
+	char** archMODRMFields_32 = {NULL};*/
+
+	archREGFields_8 = (char**)malloc(sizeof(char*)*8);
+	archREGFields_16 = (char**)malloc(sizeof(char*)*8);
+	archREGFields_32 = (char**)malloc(sizeof(char*)*8);
+	archREGFields_mm = (char**)malloc(sizeof(char*)*8);
+	archREGFields_xmm = (char**)malloc(sizeof(char*)*8);
+
+	archMODRMFields_16 = (char**)malloc(sizeof(char*)*8);
+	archMODRMFields_32 = (char**)malloc(sizeof(char*)*8);
+	//archMODRMFields_2 = (char**)malloc(sizeof(char*)*8);
+
+	for(int i = 0; i < 8; i++)
+	{
+		archREGFields_8[i] = (char*)malloc(sizeof(char)*8);
+		archREGFields_16[i] = (char*)malloc(sizeof(char)*8);
+		archREGFields_32[i] = (char*)malloc(sizeof(char)*8);
+		archREGFields_mm[i] = (char*)malloc(sizeof(char)*8);
+		archREGFields_xmm[i] = (char*)malloc(sizeof(char)*8);
+
+		archMODRMFields_16[i] = (char*)malloc(sizeof(char)*8);
+		archMODRMFields_32[i] = (char*)malloc(sizeof(char)*8);
+		//archMODRMFields_2[i] = (char*)malloc(sizeof(char)*8);
+
+		memset(archREGFields_8[i], '\0', 8);
+		memset(archREGFields_16[i], '\0', 8);
+		memset(archREGFields_32[i], '\0', 8);
+		memset(archREGFields_mm[i], '\0', 8);
+		memset(archREGFields_xmm[i], '\0', 8);
+
+		memset(archMODRMFields_16[i], '\0', 8);
+		memset(archMODRMFields_32[i], '\0', 8);
+		//memset(archMODRMFields_2[i], '\0', 8);
+
+	}
+
+	sprintf_s(archREGFields_8[0],sizeof(char)*8, "AL");
+	sprintf_s(archREGFields_8[1],sizeof(char)*8, "CL");
+	sprintf_s(archREGFields_8[2],sizeof(char)*8, "DL");
+	sprintf_s(archREGFields_8[3],sizeof(char)*8, "BL");
+	sprintf_s(archREGFields_8[4],sizeof(char)*8, "AH");
+	sprintf_s(archREGFields_8[5],sizeof(char)*8, "CH");
+	sprintf_s(archREGFields_8[6],sizeof(char)*8, "DH");
+	sprintf_s(archREGFields_8[7],sizeof(char)*8, "BH");
+
+	sprintf_s(archREGFields_16[0],sizeof(char)*8, "AX");
+	sprintf_s(archREGFields_16[1],sizeof(char)*8, "CX");
+	sprintf_s(archREGFields_16[2],sizeof(char)*8, "DX");
+	sprintf_s(archREGFields_16[3],sizeof(char)*8, "BX");
+	sprintf_s(archREGFields_16[4],sizeof(char)*8, "SP");
+	sprintf_s(archREGFields_16[5],sizeof(char)*8, "BP");
+	sprintf_s(archREGFields_16[6],sizeof(char)*8, "SI");
+	sprintf_s(archREGFields_16[7],sizeof(char)*8, "DI");
+
+	sprintf_s(archREGFields_32[0],sizeof(char)*8, "EAX");
+	sprintf_s(archREGFields_32[1],sizeof(char)*8, "ECX");
+	sprintf_s(archREGFields_32[2],sizeof(char)*8, "EDX");
+	sprintf_s(archREGFields_32[3],sizeof(char)*8, "EBX");
+	sprintf_s(archREGFields_32[4],sizeof(char)*8, "ESP");
+	sprintf_s(archREGFields_32[5],sizeof(char)*8, "EBP");
+	sprintf_s(archREGFields_32[6],sizeof(char)*8, "ESI");
+	sprintf_s(archREGFields_32[7],sizeof(char)*8, "EDI");
+
+	sprintf_s(archREGFields_mm[0],sizeof(char)*8, "MM0");
+	sprintf_s(archREGFields_mm[1],sizeof(char)*8, "MM1");
+	sprintf_s(archREGFields_mm[2],sizeof(char)*8, "MM2");
+	sprintf_s(archREGFields_mm[3],sizeof(char)*8, "MM3");
+	sprintf_s(archREGFields_mm[4],sizeof(char)*8, "MM4");
+	sprintf_s(archREGFields_mm[5],sizeof(char)*8, "MM5");
+	sprintf_s(archREGFields_mm[6],sizeof(char)*8, "MM6");
+	sprintf_s(archREGFields_mm[7],sizeof(char)*8, "MM7");
+
+	sprintf_s(archREGFields_xmm[0],sizeof(char)*8, "XMM0");
+	sprintf_s(archREGFields_xmm[1],sizeof(char)*8, "XMM1");
+	sprintf_s(archREGFields_xmm[2],sizeof(char)*8, "XMM2");
+	sprintf_s(archREGFields_xmm[3],sizeof(char)*8, "XMM3");
+	sprintf_s(archREGFields_xmm[4],sizeof(char)*8, "XMM4");
+	sprintf_s(archREGFields_xmm[5],sizeof(char)*8, "XMM5");
+	sprintf_s(archREGFields_xmm[6],sizeof(char)*8, "XMM6");
+	sprintf_s(archREGFields_xmm[7],sizeof(char)*8, "XMM7");
+
+	sprintf_s(archMODRMFields_16[0],sizeof(char)*8, "[BX+SI]");
+	sprintf_s(archMODRMFields_16[1],sizeof(char)*8, "[BX+DI]");
+	sprintf_s(archMODRMFields_16[2],sizeof(char)*8, "[BP+SI]");
+	sprintf_s(archMODRMFields_16[3],sizeof(char)*8, "[BP+DI]");
+	sprintf_s(archMODRMFields_16[4],sizeof(char)*8, "[SI]");
+	sprintf_s(archMODRMFields_16[5],sizeof(char)*8, "[DI]");
+	sprintf_s(archMODRMFields_16[6],sizeof(char)*8, "***");
+	sprintf_s(archMODRMFields_16[7],sizeof(char)*8, "[BX]");
+
+	sprintf_s(archMODRMFields_32[0],sizeof(char)*8, "[EAX]");
+	sprintf_s(archMODRMFields_32[1],sizeof(char)*8, "[ECX]");
+	sprintf_s(archMODRMFields_32[2],sizeof(char)*8, "[EDX]");
+	sprintf_s(archMODRMFields_32[3],sizeof(char)*8, "[EBX]");
+	sprintf_s(archMODRMFields_32[4],sizeof(char)*8, "***");
+	sprintf_s(archMODRMFields_32[5],sizeof(char)*8, "***");
+	sprintf_s(archMODRMFields_32[6],sizeof(char)*8, "[ESI]");
+	sprintf_s(archMODRMFields_32[7],sizeof(char)*8, "[EDI]");
+
+
+	return nReturnValue;
+}
+
+
+/*
+*Name:GetBinValueFromHex
+*Description:	This function will convert a byte to its binary value. Remember binary value is in char* which is created using malloc. So needs to be freed once its work is done.
+*Parameters:	bValue - Byte which needs to be converted
+*Return:	binary value of bye as string. If Error its NULL. 
+*/
+char* GetBinValueFromHex(BYTE bValue)
+{
+	char strValue[16] = {0};
+	char* strBinValue = NULL;
+	int i = 0, j = 0;
+
+	strBinValue = (char*)malloc(sizeof(char)*9);
+	memset(strValue, '\0', 16);
+	memset(strBinValue, '\0', sizeof(char)*9);
+
+	sprintf(strValue, "%x", bValue);
+
+	while(strValue[i])
+	{
+		switch(strValue[i])
+		{
+			case '0':
+				{
+					//printf("0000"); 
+					sprintf_s(&strBinValue[j],sizeof(char)*9, "0000");
+
+					break;
+				}
+ 
+             case '1':
+				 {
+					 //printf("0001"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "0001");
+					 break;
+				 }
+ 
+             case '2':
+				 {
+					 //printf("0010");
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "0010");
+					 break;
+				 }
+ 
+             case '3':
+				 {
+					 //printf("0011"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "0011");
+					 break;
+				 }
+ 
+             case '4':
+				 {
+					 //printf("0100");
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "0100");
+					 break;
+				 }
+ 
+             case '5':
+				 {
+					 //printf("0101"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "0101");
+					 break;
+				 }
+ 
+             case '6': 
+				 {
+					 //printf("0110"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "0110");
+					 break;
+				 }
+ 
+             case '7': 
+				 {
+					 //printf("0111"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "0111");
+					 break;
+				 }
+ 
+             case '8': 
+				 {
+					 //printf("1000"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1000");
+					 break;
+				 }
+ 
+             case '9': 
+				 {
+					 //printf("1001"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1001");
+					 break;
+				 }
+ 
+             case 'A': 
+				 {
+					 //printf("1010"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1010");
+					 break;
+				 }
+ 
+             case 'B': 
+				 {
+					 //printf("1011"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1011");
+					 break;
+				 }
+ 
+             case 'C': 
+				 {
+					 //printf("1100"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1100");
+					 break;
+				 }
+ 
+             case 'D': 
+				 {
+					 //printf("1101"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1101");
+					 break;
+				 }
+ 
+             case 'E': 
+				 {
+					 //printf("1110"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1110");
+					 break;
+				 }
+ 
+             case 'F': 
+				 {
+					 //printf("1111"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1111");
+					 break;
+				 }
+ 
+             case 'a': 
+				 {
+					 //printf("1010"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1010");
+					 break;
+				 }
+ 
+             case 'b': 
+				 {
+					 //printf("1011"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1011");
+					 break;
+				 }
+ 
+             case 'c': 
+				 {
+					 //printf("1100"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1100");
+					 break;
+				 }
+ 
+             case 'd': 
+				 {
+					 //printf("1101"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1101");
+					 break;
+				 }
+ 
+             case 'e': 
+				 {
+					 //printf("1110"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1110");
+					 break;
+				 }
+ 
+             case 'f': 
+				 {
+					 //printf("1111"); 
+					 sprintf_s(&strBinValue[j],sizeof(char)*9, "1111");
+					 break;
+				 }
+ 
+             default:  
+				 {
+					 
+					 return NULL;
+				 }
+			}
+ 
+       
+		 j = strlen(strBinValue);
+         i++;
+	}
+
+	return strBinValue;
+
+
+}
+
+/*
+*Name: GetDecimalValueFromBinary
+*Description: This function will return you decimal value for Binary value. Binary value should have size 3 bits
+*Parameter: strBinValue - 3 bit size binary value
+*ReturnValue: Decimal value of the binary string. If cannot find then -1.
+*/
+int GetDecimalValueFromBinary(char* strBinValue)
+{
+	int nRetVal = -1;
+
+	if(strlen(strBinValue) != 3)
+	{
+		return nRetVal;
+	}
+
+	if(strBinValue[0] == '0' && strBinValue[1] =='0' && strBinValue[2] == '0')
+	{
+		nRetVal = 0;
+	}
+	else if(strBinValue[0] == '0' && strBinValue[1] =='0' && strBinValue[2] == '1')
+	{
+		nRetVal = 1;
+	}
+	else if(strBinValue[0] == '0' && strBinValue[1] =='1' && strBinValue[2] == '0')
+	{
+		nRetVal =  2;
+	}
+	else if(strBinValue[0] == '0' && strBinValue[1] =='1' && strBinValue[2] == '1')
+	{
+		nRetVal =  3;
+	}
+	else if(strBinValue[0] == '1' && strBinValue[1] =='0' && strBinValue[2] == '0')
+	{
+		nRetVal =  4;
+	}
+	else if(strBinValue[0] == '1' && strBinValue[1] =='0' && strBinValue[2] == '1')
+	{
+		nRetVal =  5;
+	}
+	else if(strBinValue[0] == '1' && strBinValue[1] =='1' && strBinValue[2] == '0')
+	{
+		nRetVal =  6;
+	}
+	else if(strBinValue[0] == '1' && strBinValue[1] =='1' && strBinValue[2] == '1')
+	{
+		nRetVal =  7;
+	}
+	else 
+	{
+		nRetVal =  -1;
+	}
+
+	return nRetVal;
+}
+
+/*
+*Name: DecodeADD
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of ADD instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarPrefix - list of prefixes
+*Return: 0 For success else some error has occured.
+*/
+int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
+{
+	int nReturnValue = 0;
+	BYTE* byarTempOpcode = NULL;
+	char* strModRMValueInBinary = NULL;
+	int nTempRMDecimalValue = -1;
+	int nTempRegDecimalValue = -1;
+	char strTempRegValue[4] = {0};
+	char strTempRMValue[4] = {0};
 
 	switch(byOpcode)
 	{
 	case 0x00:
 		{
+			//ADD Eb, Gb
+			pInst = (Instruction*)malloc(sizeof(Instruction));
+			byarTempOpcode = (BYTE*)malloc(sizeof(BYTE)*1);
+			byarTempOpcode[0] = byOpcode;
+			pInst->OpcodePart = byarTempOpcode;
+			pInst->OpcodeSize = 1;
+			pInst->PrefixSize = nPrefixSize;
+			pInst->PrefixPart = byarPrefix;
+			pInst->bmodRMExists = true;
+			pInst->bSibExists = false;
+			pInst->Displacement = 0;
+			pInst->DisplacementSize = 0;
+			pInst->Immediate = 0;
+			pInst->ImmediateSize = 0;
+			pInst->sibpart = 0;
+
+			nCurrentIndex++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				strModRMValueInBinary = GetBinValueFromHex(pInst->modrmpart);
+				if(NULL != strModRMValueInBinary)
+				{
+					strTempRegValue[0] = strModRMValueInBinary[3];
+					strTempRegValue[1] = strModRMValueInBinary[4];
+					strTempRegValue[2] = strModRMValueInBinary[5];
+					strTempRegValue[3] = '\0';
+
+					strTempRMValue[0] = strModRMValueInBinary[0];
+					strTempRMValue[1] = strModRMValueInBinary[1];
+					strTempRMValue[2] = strModRMValueInBinary[2];
+					strTempRMValue[3] = '\0';
+
+					nTempRMDecimalValue = GetDecimalValueFromBinary(strTempRMValue);
+					nTempRegDecimalValue = GetDecimalValueFromBinary(strTempRegValue);
+					//Eb
+					if(strModRMValueInBinary[6] == 1 && strModRMValueInBinary[7] == 1)
+					{
+						
+					}
+					else if(strModRMValueInBinary[6] == 1 && strModRMValueInBinary[7] == 1)
+					{
+
+					}
+					else
+					{
+
+					}
+
+					//Gb
+
+					
+					free(strModRMValueInBinary);
+					strModRMValueInBinary = NULL;
+				}
+
+
+
+			}
+			else
+			{
+				nReturnValue = -2;
+				//Error scenario - Exceeded raw code but still instruction is incomplete
+			}
+
 			break;
 		}
 	case 0x01:
