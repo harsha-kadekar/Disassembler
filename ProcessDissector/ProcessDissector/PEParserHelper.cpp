@@ -22,6 +22,9 @@ char** archMODRMFields_16 = {NULL};
 char** archMODRMFields_32 = {NULL};
 //char** archMODRMFields_2 = {NULL};
 
+char** archSIBIndex = {NULL};
+char** archSIBBase = {NULL};
+
 
 
 
@@ -1541,6 +1544,9 @@ int InitializeDissassemblyEngine()
 	archMODRMFields_32 = (char**)malloc(sizeof(char*)*8);
 	//archMODRMFields_2 = (char**)malloc(sizeof(char*)*8);
 
+	archSIBIndex = (char**)malloc(sizeof(char*)*8);
+	archSIBBase = (char**)malloc(sizeof(char*)*8);
+
 	for(int i = 0; i < 8; i++)
 	{
 		archREGFields_8[i] = (char*)malloc(sizeof(char)*8);
@@ -1553,11 +1559,17 @@ int InitializeDissassemblyEngine()
 		archMODRMFields_32[i] = (char*)malloc(sizeof(char)*8);
 		//archMODRMFields_2[i] = (char*)malloc(sizeof(char)*8);
 
+		archSIBIndex[i] = (char*)malloc(sizeof(char)*8);
+		archSIBBase[i] = (char*)malloc(sizeof(char)*8);
+
 		memset(archREGFields_8[i], '\0', 8);
 		memset(archREGFields_16[i], '\0', 8);
 		memset(archREGFields_32[i], '\0', 8);
 		memset(archREGFields_mm[i], '\0', 8);
 		memset(archREGFields_xmm[i], '\0', 8);
+
+		memset(archSIBIndex[i], '\0', 8);
+		memset(archSIBBase[i], '\0', 8);
 
 		memset(archMODRMFields_16[i], '\0', 8);
 		memset(archMODRMFields_32[i], '\0', 8);
@@ -1610,23 +1622,41 @@ int InitializeDissassemblyEngine()
 	sprintf_s(archREGFields_xmm[6],sizeof(char)*8, "XMM6");
 	sprintf_s(archREGFields_xmm[7],sizeof(char)*8, "XMM7");
 
-	sprintf_s(archMODRMFields_16[0],sizeof(char)*8, "[BX+SI]");
-	sprintf_s(archMODRMFields_16[1],sizeof(char)*8, "[BX+DI]");
-	sprintf_s(archMODRMFields_16[2],sizeof(char)*8, "[BP+SI]");
-	sprintf_s(archMODRMFields_16[3],sizeof(char)*8, "[BP+DI]");
-	sprintf_s(archMODRMFields_16[4],sizeof(char)*8, "[SI]");
-	sprintf_s(archMODRMFields_16[5],sizeof(char)*8, "[DI]");
+	sprintf_s(archMODRMFields_16[0],sizeof(char)*8, "BX+SI");
+	sprintf_s(archMODRMFields_16[1],sizeof(char)*8, "BX+DI");
+	sprintf_s(archMODRMFields_16[2],sizeof(char)*8, "BP+SI");
+	sprintf_s(archMODRMFields_16[3],sizeof(char)*8, "BP+DI");
+	sprintf_s(archMODRMFields_16[4],sizeof(char)*8, "SI");
+	sprintf_s(archMODRMFields_16[5],sizeof(char)*8, "DI");
 	sprintf_s(archMODRMFields_16[6],sizeof(char)*8, "***");
-	sprintf_s(archMODRMFields_16[7],sizeof(char)*8, "[BX]");
+	sprintf_s(archMODRMFields_16[7],sizeof(char)*8, "BX");
 
-	sprintf_s(archMODRMFields_32[0],sizeof(char)*8, "[EAX]");
-	sprintf_s(archMODRMFields_32[1],sizeof(char)*8, "[ECX]");
-	sprintf_s(archMODRMFields_32[2],sizeof(char)*8, "[EDX]");
-	sprintf_s(archMODRMFields_32[3],sizeof(char)*8, "[EBX]");
+	sprintf_s(archMODRMFields_32[0],sizeof(char)*8, "EAX");
+	sprintf_s(archMODRMFields_32[1],sizeof(char)*8, "ECX");
+	sprintf_s(archMODRMFields_32[2],sizeof(char)*8, "EDX");
+	sprintf_s(archMODRMFields_32[3],sizeof(char)*8, "EBX");
 	sprintf_s(archMODRMFields_32[4],sizeof(char)*8, "***");
 	sprintf_s(archMODRMFields_32[5],sizeof(char)*8, "***");
-	sprintf_s(archMODRMFields_32[6],sizeof(char)*8, "[ESI]");
-	sprintf_s(archMODRMFields_32[7],sizeof(char)*8, "[EDI]");
+	sprintf_s(archMODRMFields_32[6],sizeof(char)*8, "ESI");
+	sprintf_s(archMODRMFields_32[7],sizeof(char)*8, "EDI");
+
+	sprintf_s(archSIBIndex[0], sizeof(char)*8, "EAX");
+	sprintf_s(archSIBIndex[1], sizeof(char)*8, "ECX");
+	sprintf_s(archSIBIndex[2], sizeof(char)*8, "EDX");
+	sprintf_s(archSIBIndex[3], sizeof(char)*8, "EBX");
+	sprintf_s(archSIBIndex[4], sizeof(char)*8, "---");
+	sprintf_s(archSIBIndex[5], sizeof(char)*8, "EBP");
+	sprintf_s(archSIBIndex[6], sizeof(char)*8, "ESI]");
+	sprintf_s(archSIBIndex[7], sizeof(char)*8, "EDI");
+
+	sprintf_s(archSIBBase[0], sizeof(char)*8, "EAX");
+	sprintf_s(archSIBBase[1], sizeof(char)*8, "ECX");
+	sprintf_s(archSIBBase[2], sizeof(char)*8, "EDX");
+	sprintf_s(archSIBBase[3], sizeof(char)*8, "EBX");
+	sprintf_s(archSIBBase[4], sizeof(char)*8, "ESP");
+	sprintf_s(archSIBBase[5], sizeof(char)*8, "disp");
+	sprintf_s(archSIBBase[6], sizeof(char)*8, "ESI");
+	sprintf_s(archSIBBase[7], sizeof(char)*8, "EDI");
 
 
 	return nReturnValue;
@@ -1883,6 +1913,134 @@ int GetDecimalValueFromBinary(char* strBinValue)
 }
 
 /*
+*Name: ParseModRegRMByte
+*Description: This function decodes the moderegbyte and gives the subsequent values of it;
+*Parameter: byModeRegRM - actual ModRegRM byte
+*			pModRegRM - pointer to the ModRegRM structure which will be allocated in this function.
+*Return: 0 For success else error has occured
+*/
+int ParseModRegRMByte(BYTE byModeRegRM, ModRegRM* pModRegRM)
+{
+
+	int nReturnValue = 0;
+	char* strModRMValueInBinary = NULL;
+	char strTempRegValue[4] = {0};
+	char strTempRMValue[4] = {0};
+
+
+	
+	strModRMValueInBinary = GetBinValueFromHex(byModeRegRM);
+	if(NULL != strModRMValueInBinary)
+	{
+
+		pModRegRM = (ModRegRM*)malloc(sizeof(ModRegRM));
+		pModRegRM->actualModeRegRM = byModeRegRM;
+
+		strTempRegValue[0] = strModRMValueInBinary[2];
+		strTempRegValue[1] = strModRMValueInBinary[3];
+		strTempRegValue[2] = strModRMValueInBinary[4];
+		strTempRegValue[3] = '\0';
+
+		strTempRMValue[0] = strModRMValueInBinary[5];
+		strTempRMValue[1] = strModRMValueInBinary[6];
+		strTempRMValue[2] = strModRMValueInBinary[7];
+		strTempRMValue[3] = '\0';
+
+		pModRegRM->rm = GetDecimalValueFromBinary(strTempRMValue);
+		pModRegRM->reg = GetDecimalValueFromBinary(strTempRegValue);
+
+		if(strModRMValueInBinary[0] == '0' && strModRMValueInBinary[1] == '0')
+		{
+			pModRegRM->mode = 0;
+		}
+		else if(strModRMValueInBinary[0] == '0' && strModRMValueInBinary[1] == '1')
+		{
+			pModRegRM->mode = 1;
+		}
+		else if(strModRMValueInBinary[0] == '1' && strModRMValueInBinary[1] == '0')
+		{
+			pModRegRM->mode = 2;
+		}
+		else
+		{
+			pModRegRM->mode = 3;
+		}
+
+
+	}
+	else
+	{
+		nReturnValue = -1;
+	}
+	free(strModRMValueInBinary);
+	return nReturnValue;
+}
+
+/*
+*Name: ParseSIBByte
+*Description: This function decodes the SIB and gives the subsequent values of it;
+*Parameter: bySIB - actual ModRegRM byte
+*			pSIB - pointer to the SIB structure which will be allocated in this function.
+*Return: 0 For success else error has occured
+*/
+int ParseSIBByte(BYTE bySIB, SIB* pSIB)
+{
+	int nReturnValue = 0;
+	char* strSIBValueInBinary = NULL;
+	char strTempIndexValue[4] = {NULL};
+	char strTempBaseValue[4] = {NULL};
+
+	
+
+	strSIBValueInBinary = GetBinValueFromHex(bySIB);
+	if(NULL != strSIBValueInBinary)
+	{
+
+		pSIB = (SIB*)malloc(sizeof(SIB));
+
+		pSIB->actualSIB = bySIB;
+
+		if(strSIBValueInBinary[0] == 0 && strSIBValueInBinary[1] == 0)
+		{
+			pSIB->scale = 1;
+
+		}
+		else if(strSIBValueInBinary[0] == 0 && strSIBValueInBinary[1] == 1)
+		{
+			pSIB->scale = 2;
+		}
+		else if(strSIBValueInBinary[1] == 0 && strSIBValueInBinary[1] == 0)
+		{
+			pSIB->scale = 4;
+		}
+		else
+		{
+			pSIB->scale = 8;
+		}
+
+		strTempIndexValue[0] = strSIBValueInBinary[2];
+		strTempIndexValue[1] = strSIBValueInBinary[3];
+		strTempIndexValue[2] = strSIBValueInBinary[4];
+		strTempIndexValue[3] = '\0';
+
+		strTempBaseValue[0] = strSIBValueInBinary[5];
+		strTempBaseValue[1] = strSIBValueInBinary[6];
+		strTempBaseValue[2] = strSIBValueInBinary[7];
+		strTempBaseValue[3] = '\0';
+
+		pSIB->index = GetDecimalValueFromBinary(strTempIndexValue);
+		pSIB->base = GetDecimalValueFromBinary(strTempBaseValue);
+
+	}
+	else
+	{
+		nReturnValue = -1;
+	}
+	free(strSIBValueInBinary);
+	return nReturnValue;
+}
+
+/*
 *Name: DecodeADD
 *Description: This function decode all the opcodes which are pertaining to single byte OPCODE of ADD instruction.
 *Parameters: byOpcode - Actual opcode,
@@ -1893,11 +2051,15 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 {
 	int nReturnValue = 0;
 	BYTE* byarTempOpcode = NULL;
-	char* strModRMValueInBinary = NULL;
-	int nTempRMDecimalValue = -1;
-	int nTempRegDecimalValue = -1;
-	char strTempRegValue[4] = {0};
-	char strTempRMValue[4] = {0};
+
+	char strOperand1[1024] = {0};
+	char strOperand2[1024] = {0};
+	char strCompInstruction[1024] = {0};
+	char strRawInstruction[1024] = {0};
+	int i = 0;
+
+	SIB* pSIB = NULL;
+	ModRegRM* pModRegRM = NULL;
 
 	switch(byOpcode)
 	{
@@ -1918,47 +2080,295 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 			pInst->Immediate = 0;
 			pInst->ImmediateSize = 0;
 			pInst->sibpart = 0;
+			pInst->LengthOfInstruction = pInst->PrefixSize + 1;
+
+			if(nPrefixSize > 0)
+			{
+				sprintf(strRawInstruction, "%x ", byarPrefix[i++]);
+
+				while(i < nPrefixSize)
+				{
+					sprintf(strRawInstruction, "%s%x ", strRawInstruction, byarPrefix[i++]);
+				}
+
+				sprintf(strRawInstruction, "%s%x ", strRawInstruction, byOpcode);
+			}
+			else
+			{
+				sprintf(strRawInstruction, "%x ", byOpcode);
+			}
+
 
 			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
 
 			if(nCurrentIndex < nSize)
 			{
 				pInst->modrmpart = byarRawCode[nCurrentIndex];
-				strModRMValueInBinary = GetBinValueFromHex(pInst->modrmpart);
-				if(NULL != strModRMValueInBinary)
+				sprintf(strRawInstruction, "%s%x ",strRawInstruction, pInst->modrmpart);
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+				if(pModRegRM != NULL)
 				{
-					strTempRegValue[0] = strModRMValueInBinary[3];
-					strTempRegValue[1] = strModRMValueInBinary[4];
-					strTempRegValue[2] = strModRMValueInBinary[5];
-					strTempRegValue[3] = '\0';
-
-					strTempRMValue[0] = strModRMValueInBinary[0];
-					strTempRMValue[1] = strModRMValueInBinary[1];
-					strTempRMValue[2] = strModRMValueInBinary[2];
-					strTempRMValue[3] = '\0';
-
-					nTempRMDecimalValue = GetDecimalValueFromBinary(strTempRMValue);
-					nTempRegDecimalValue = GetDecimalValueFromBinary(strTempRegValue);
 					//Eb
-					if(strModRMValueInBinary[6] == 1 && strModRMValueInBinary[7] == 1)
+					switch(pModRegRM->mode)
 					{
-						
-					}
-					else if(strModRMValueInBinary[6] == 1 && strModRMValueInBinary[7] == 1)
-					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									sprintf(strRawInstruction, "%s%x ",strRawInstruction, pInst->sibpart);
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+											
+											pInst->DisplacementSize = 4;
+											pInst->Displacement = 0;
+											i = 0;
+											while(nCurrentIndex+1 < nSize && i < 4)
+											{
+												nCurrentIndex++;
+												pInst->LengthOfInstruction++;
+												pInst->Displacement += byarRawCode[nCurrentIndex];
+												sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
+												
+												i++;
+											}
 
-					}
-					else
-					{
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "ADD byte ptr [%x+%d*%s], ", pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "ADD byte ptr [%x], ", pInst->Displacement);
+										}
+										else
+										{
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "ADD byte ptr [%d*%s+%s], ", pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "ADD byte ptr [%s], ", archSIBBase[pSIB->base]);
+										}
+										free(pSIB);
 
+									}
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								//Get Displacement 32 bits
+								
+								pInst->DisplacementSize = 4;
+								pInst->Displacement = 0;
+								i = 0;
+								while(nCurrentIndex+1 < nSize && i < 4)
+								{
+									nCurrentIndex++;
+									pInst->LengthOfInstruction++;
+									pInst->Displacement += byarRawCode[nCurrentIndex];
+									sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
+									i++;
+								}
+
+								sprintf(strCompInstruction, "ADD byte ptr [%x], ", pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "ADD byte ptr [%s], ",archMODRMFields_32[pModRegRM->rm]); 
+
+							}
+							break;
+						}
+					case 1:
+						{
+							
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									pInst->DisplacementSize = 1;
+									pInst->Displacement = 0;
+									i = 0;
+									while(nCurrentIndex+1 < nSize && i < 1)
+									{
+										
+										nCurrentIndex++;
+										pInst->LengthOfInstruction++;
+										pInst->Displacement += byarRawCode[nCurrentIndex];
+										sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
+										
+										i++;
+									}
+
+									if(pSIB != NULL)
+									{
+										if(5 == pSIB->base)
+										{
+											
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "ADD byte ptr [%x+%d*%s+EBP], ",pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "ADD byte ptr [%x+EBP], ", pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "ADD byte ptr [%x+%d*%s+%s], ",pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "ADD byte ptr [%x+%s], ", pInst->Displacement, archSIBBase[pSIB->base]);
+
+										}
+										free(pSIB);
+
+									}
+
+									
+									
+
+								}
+
+							}
+							else
+							{
+								pInst->DisplacementSize = 1;
+								pInst->Displacement = 0;
+								i = 0;
+								while(nCurrentIndex+1 < nSize && i < 1)
+								{
+									
+									nCurrentIndex++;
+									pInst->LengthOfInstruction++;
+									pInst->Displacement += byarRawCode[nCurrentIndex];
+									sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
+									i++;
+								}
+
+								sprintf(strCompInstruction, "ADD byte ptr [%s+%x], ", archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 2:
+						{
+							
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									pInst->DisplacementSize = 4;
+									pInst->Displacement = 0;
+									i = 0;
+									while(nCurrentIndex+1 < nSize && i < 4)
+									{
+										
+										nCurrentIndex++;
+										pInst->LengthOfInstruction++;
+										pInst->Displacement += byarRawCode[nCurrentIndex];
+										sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
+										i++;
+									}
+
+									if(pSIB != NULL)
+									{
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "ADD byte ptr [%x+%d*%s+EBP], ",pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "ADD byte ptr [%x+EBP], ", pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "ADD byte ptr [%x+%d*%s+%s], ",pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "ADD byte ptr [%x+%s], ", pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+										free(pSIB);
+
+									}
+
+								}
+
+							}
+							else
+							{
+								pInst->DisplacementSize = 4;
+								pInst->Displacement = 0;
+								i = 0;
+								while(nCurrentIndex+1 < nSize && i < 4)
+								{
+									
+									nCurrentIndex++;
+									pInst->LengthOfInstruction++;
+									pInst->Displacement += byarRawCode[nCurrentIndex];
+									sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
+									i++;
+								}
+
+								sprintf(strCompInstruction, "ADD byte ptr [%s+%x], ", archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+							}
+							break;
+						}
+					case 3:
+						{
+							
+							sprintf(strCompInstruction, "ADD %s, ", archREGFields_8[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							break;
+						}
 					}
 
 					//Gb
-
 					
-					free(strModRMValueInBinary);
-					strModRMValueInBinary = NULL;
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_8[pModRegRM->reg]);
+
+					pInst->actualInstruction = (char*)malloc(sizeof(char)*strlen(strCompInstruction)+1);
+					memset(pInst->actualInstruction, '\0', strlen(strCompInstruction)+1);
+
+					strcpy_s(pInst->actualInstruction, strlen(strCompInstruction), strCompInstruction);
+
+					pInst->encodedInstruction = (char*)malloc(sizeof(char)*strlen(strRawInstruction)+1);
+					memset(pInst->encodedInstruction, '\0', strlen(strRawInstruction)+1);
+
+					strcpy_s(pInst->encodedInstruction, strlen(strRawInstruction), strRawInstruction);
+
+
+
+					free(pModRegRM);
 				}
+
+
+				
 
 
 
@@ -1973,22 +2383,75 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 		}
 	case 0x01:
 		{
+			//ADD Ev,Gv
+			pInst = (Instruction*)malloc(sizeof(Instruction));
+			byarTempOpcode = (BYTE*)malloc(sizeof(BYTE)*1);
+			byarTempOpcode[0] = byOpcode;
+			pInst->OpcodePart = byarTempOpcode;
+			pInst->OpcodeSize = 1;
+			pInst->PrefixSize = nPrefixSize;
+			pInst->PrefixPart = byarPrefix;
+			pInst->bmodRMExists = true;
+			pInst->bSibExists = false;
+			pInst->Displacement = 0;
+			pInst->DisplacementSize = 0;
+			pInst->Immediate = 0;
+			pInst->ImmediateSize = 0;
+			pInst->sibpart = 0;
+			pInst->LengthOfInstruction = pInst->PrefixSize + 1;
+
+			if(nPrefixSize > 0)
+			{
+				sprintf(strRawInstruction, "%x ", byarPrefix[i++]);
+
+				while(i < nPrefixSize)
+				{
+					sprintf(strRawInstruction, "%s%x ", strRawInstruction, byarPrefix[i++]);
+				}
+
+				sprintf(strRawInstruction, "%s%x ", strRawInstruction, byOpcode);
+			}
+			else
+			{
+				sprintf(strRawInstruction, "%x ", byOpcode);
+			}
+
+
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				sprintf(strRawInstruction, "%s%x ",strRawInstruction, pInst->modrmpart);
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+			}
+			else
+			{
+				//Error
+			}
+
 			break;
 		}
 	case 0x02:
 		{
+			//Gb,Eb
 			break;
 		}
 	case 0x03:
 		{
+			//Gv,Ev
 			break;
 		}
 	case 0x04:
 		{
+			//AL,lb
 			break;
 		}
 	case 0x05:
 		{
+			//rAX, lz
 			break;
 		}
 	default:

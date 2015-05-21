@@ -28,6 +28,22 @@ typedef struct structInstruction
 	DWORD beginingAddress;
 }Instruction;
 
+typedef struct structModRegRM
+{
+	BYTE actualModeRegRM;
+	int mode;
+	int reg;
+	int rm;
+}ModRegRM;
+
+typedef struct structSIB
+{
+	BYTE actualSIB;
+	int scale;
+	int index;
+	int base;
+}SIB;
+
 int DecodeADD(BYTE byOpcode, BYTE* byarPrefix);
 
 #endif
