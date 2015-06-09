@@ -44,6 +44,22 @@ typedef struct structSIB
 	int base;
 }SIB;
 
-int DecodeADD(BYTE byOpcode, BYTE* byarPrefix);
+int DecodeADD(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodePushPoP(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeOR(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeADC(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeSBB(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeAND(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeDAA(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeSUB(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeDAS(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeXOR(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeAAA(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeCMP(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeAAS(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeINC(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeDEC(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeBOUND(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
+int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
 
 #endif

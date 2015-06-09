@@ -7,7 +7,7 @@
 
 #include "PEParserHelper.h"
 
-typedef int (*pt2Function)(BYTE byOpcode, BYTE* byarPrefix);
+typedef int (*pt2Function)(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst);
 pt2Function DecodeFunctions[256] = {NULL};
 pt2Function DecodeFunctions_2[256] = {NULL};
 pt2Function DecodeFunctions_3[256] = {NULL};
@@ -1228,6 +1228,39 @@ DWORD RVAToOffset(LPVOID lpFileBase, DWORD dwRVA)
 }
 
 /*
+*Name: GetAnInstruction
+*Description: This is an initialization code of Instruction struction.
+*Parameter: byOpcode - Opcode whose instruction being created
+*			nPrefixSize - Number of prefix
+*			byarPrefix - array of prefix bytes
+*ReturnValue: returns the created instruction structure.
+*/
+Instruction* GetAnInstruction(BYTE byOpcode, int nPrefixSize, BYTE* byarPrefix)
+{
+	int nReturnValue = 0;
+	BYTE* byarTempOpcode = NULL;
+	Instruction* pInst = NULL;
+
+	pInst = (Instruction*)malloc(sizeof(Instruction));
+	byarTempOpcode = (BYTE*)malloc(sizeof(BYTE)*1);
+	byarTempOpcode[0] = byOpcode;
+	pInst->OpcodePart = byarTempOpcode;
+	pInst->OpcodeSize = 1;
+	pInst->PrefixSize = nPrefixSize;
+	pInst->PrefixPart = byarPrefix;
+	pInst->bmodRMExists = false;
+	pInst->bSibExists = false;
+	pInst->Displacement = 0;
+	pInst->DisplacementSize = 0;
+	pInst->Immediate = 0;
+	pInst->ImmediateSize = 0;
+	pInst->sibpart = 0;
+	pInst->LengthOfInstruction = pInst->PrefixSize + 1;
+
+	return pInst;
+}
+
+/*
 Name: DisAssembleBytes32
 Parameters: pbyCode - this is an array containing raw code section
 			nSize - Size of the pbyCode array
@@ -1471,6 +1504,7 @@ int DisAssembleBytes32(BYTE* pbyCode, int nSize)
 			}
 			else
 			{
+				GetAnInstruction(pbyCode[i], iterator, byPrefix);
 				//This is a 1 byte opcode
 				switch(iterator)
 				{
@@ -1659,8 +1693,128 @@ int InitializeDissassemblyEngine()
 	sprintf_s(archSIBBase[7], sizeof(char)*8, "EDI");
 
 
+	DecodeFunctions[0x00] = &DecodeADD;
+	DecodeFunctions[0x01] = &DecodeADD;
+	DecodeFunctions[0x02] = &DecodeADD;
+	DecodeFunctions[0x03] = &DecodeADD;
+	DecodeFunctions[0x04] = &DecodeADD;
+	DecodeFunctions[0x05] = &DecodeADD;
+
+	DecodeFunctions[0x06] = &DecodePushPoP;
+	DecodeFunctions[0x07] = &DecodePushPoP;
+	DecodeFunctions[0x0E] = &DecodePushPoP;
+	DecodeFunctions[0x16] = &DecodePushPoP;
+	DecodeFunctions[0x17] = &DecodePushPoP;
+	DecodeFunctions[0x1E] = &DecodePushPoP;
+	DecodeFunctions[0x1F] = &DecodePushPoP;
+	DecodeFunctions[0x50] = &DecodePushPoP;
+	DecodeFunctions[0x51] = &DecodePushPoP;
+	DecodeFunctions[0x52] = &DecodePushPoP;
+	DecodeFunctions[0x53] = &DecodePushPoP;
+	DecodeFunctions[0x54] = &DecodePushPoP;
+	DecodeFunctions[0x55] = &DecodePushPoP;
+	DecodeFunctions[0x56] = &DecodePushPoP;
+	DecodeFunctions[0x57] = &DecodePushPoP;
+	DecodeFunctions[0x58] = &DecodePushPoP;
+	DecodeFunctions[0x59] = &DecodePushPoP;
+	DecodeFunctions[0x5A] = &DecodePushPoP;
+	DecodeFunctions[0x5B] = &DecodePushPoP;
+	DecodeFunctions[0x5C] = &DecodePushPoP;
+	DecodeFunctions[0x5D] = &DecodePushPoP;
+	DecodeFunctions[0x5E] = &DecodePushPoP;
+	DecodeFunctions[0x5F] = &DecodePushPoP;
+	DecodeFunctions[0x60] = &DecodePushPoP;
+	DecodeFunctions[0x61] = &DecodePushPoP;
+	DecodeFunctions[0x68] = &DecodePushPoP;
+	DecodeFunctions[0x6A] = &DecodePushPoP;
+	DecodeFunctions[0x9C] = &DecodePushPoP;
+	DecodeFunctions[0x9D] = &DecodePushPoP;
+
+	DecodeFunctions[0x08] = &DecodeOR;
+	DecodeFunctions[0x09] = &DecodeOR;
+	DecodeFunctions[0x0A] = &DecodeOR;
+	DecodeFunctions[0x0B] = &DecodeOR;
+	DecodeFunctions[0x0C] = &DecodeOR;
+	DecodeFunctions[0x0D] = &DecodeOR;
+
+	DecodeFunctions[0x10] = &DecodeADC;
+	DecodeFunctions[0x11] = &DecodeADC;
+	DecodeFunctions[0x12] = &DecodeADC;
+	DecodeFunctions[0x13] = &DecodeADC;
+	DecodeFunctions[0x14] = &DecodeADC;
+	DecodeFunctions[0x15] = &DecodeADC;
+
+	DecodeFunctions[0x18] = &DecodeSBB;
+	DecodeFunctions[0x19] = &DecodeSBB;
+	DecodeFunctions[0x1A] = &DecodeSBB;
+	DecodeFunctions[0x1B] = &DecodeSBB;
+	DecodeFunctions[0x1C] = &DecodeSBB;
+	DecodeFunctions[0x1D] = &DecodeSBB;
+
+	DecodeFunctions[0x20] = &DecodeAND;
+	DecodeFunctions[0x21] = &DecodeAND;
+	DecodeFunctions[0x22] = &DecodeAND;
+	DecodeFunctions[0x23] = &DecodeAND;
+	DecodeFunctions[0x24] = &DecodeAND;
+	DecodeFunctions[0x25] = &DecodeAND;
+
+	DecodeFunctions[0x27] = &DecodeDAA;
+
+	DecodeFunctions[0x28] = &DecodeSUB;
+	DecodeFunctions[0x29] = &DecodeSUB;
+	DecodeFunctions[0x2A] = &DecodeSUB;
+	DecodeFunctions[0x2B] = &DecodeSUB;
+	DecodeFunctions[0x2C] = &DecodeSUB;
+	DecodeFunctions[0x2D] = &DecodeSUB;
+
+	DecodeFunctions[0x2F] = &DecodeDAS;
+
+	DecodeFunctions[0x30] = &DecodeXOR;
+	DecodeFunctions[0x31] = &DecodeXOR;
+	DecodeFunctions[0x32] = &DecodeXOR;
+	DecodeFunctions[0x33] = &DecodeXOR;
+	DecodeFunctions[0x34] = &DecodeXOR;
+	DecodeFunctions[0x35] = &DecodeXOR;
+
+	DecodeFunctions[0x37] = &DecodeAAA;
+
+	DecodeFunctions[0x38] = &DecodeCMP;
+	DecodeFunctions[0x39] = &DecodeCMP;
+	DecodeFunctions[0x3A] = &DecodeCMP;
+	DecodeFunctions[0x3B] = &DecodeCMP;
+	DecodeFunctions[0x3C] = &DecodeCMP;
+	DecodeFunctions[0x3D] = &DecodeCMP;
+	DecodeFunctions[0xA6] = &DecodeCMP;
+	DecodeFunctions[0xA7] = &DecodeCMP;
+
+	DecodeFunctions[0x3F] = &DecodeAAS;
+
+	DecodeFunctions[0x40] = &DecodeINC;
+	DecodeFunctions[0x41] = &DecodeINC;
+	DecodeFunctions[0x42] = &DecodeINC;
+	DecodeFunctions[0x43] = &DecodeINC;
+	DecodeFunctions[0x44] = &DecodeINC;
+	DecodeFunctions[0x45] = &DecodeINC;
+	DecodeFunctions[0x46] = &DecodeINC;
+	DecodeFunctions[0x47] = &DecodeINC;
+
+	DecodeFunctions[0x48] = &DecodeDEC;
+	DecodeFunctions[0x49] = &DecodeDEC;
+	DecodeFunctions[0x4A] = &DecodeDEC;
+	DecodeFunctions[0x4B] = &DecodeDEC;
+	DecodeFunctions[0x4C] = &DecodeDEC;
+	DecodeFunctions[0x4D] = &DecodeDEC;
+	DecodeFunctions[0x4E] = &DecodeDEC;
+	DecodeFunctions[0x4F] = &DecodeDEC;
+
+	DecodeFunctions[0x62] = &DecodeBOUND;
+
+	DecodeFunctions[0x63] = &DecodeMOV;
+
 	return nReturnValue;
 }
+
+
 
 
 /*
@@ -1913,6 +2067,312 @@ int GetDecimalValueFromBinary(char* strBinValue)
 }
 
 /*
+*Name: HexCharToInt
+*Description: This function converts a hex character to integer value;
+*Parameter: ch - Hex character which needs to be converted 
+*Return: integer value of the hexadecimal character
+*/
+
+int HexCharToInt(char ch)
+{
+	int nRetVal = -1;
+
+	switch(ch)
+	{
+	case '0':
+		{
+			nRetVal = 0;
+			break;
+		}
+	case '1':
+		{
+			nRetVal = 1;
+			break;
+		}
+	case '2':
+		{
+			nRetVal = 2;
+			break;
+		}
+	case '3':
+		{
+			nRetVal = 3;
+			break;
+		}
+	case '4':
+		{
+			nRetVal = 4;
+			break;
+		}
+	case '5':
+		{
+			nRetVal = 5;
+			break;
+		}
+	case '6':
+		{
+			nRetVal = 6;
+			break;
+		}
+	case '7':
+		{
+			nRetVal = 7;
+			break;
+		}
+	case '8':
+		{
+			nRetVal = 8;
+			break;
+		}
+	case '9':
+		{
+			nRetVal = 9;
+			break;
+		}
+	case 'a':
+		{
+			nRetVal = 10;
+			break;
+		}
+	case 'A':
+		{
+			nRetVal = 10;
+			break;
+		}
+	case 'b':
+		{
+			nRetVal = 11;
+			break;
+		}
+	case 'B':
+		{
+			nRetVal = 11;
+			break;
+		}
+	case 'c':
+		{
+			nRetVal = 12;
+			break;
+		}
+	case 'C':
+		{
+			nRetVal = 12;
+			break;
+		}
+	case 'd':
+		{
+			nRetVal = 13;
+			break;
+		}
+	case 'D':
+		{
+			nRetVal = 13;
+			break;
+		}
+	case 'e':
+		{
+			nRetVal = 14;
+			break;
+		}
+	case 'E':
+		{
+			nRetVal = 14;
+			break;
+		}
+	case 'f':
+		{
+			nRetVal = 15;
+			break;
+		}
+	case 'F':
+		{
+			nRetVal = 15;
+			break;
+		}
+	default:
+		{
+			nRetVal = -2;
+			break;
+		}
+
+	}
+
+	return nRetVal;
+}
+
+/*
+*Name: GetDisplacementOfInstruction
+*Description: This function will get you the displacement value in the instruction;
+*Parameter: Buffer - byte array containing instructions
+*			index - Current index where displacement value starts
+*			nSize - Size of the displacement to be retrieved
+*			pInst - Instruction whose displacement we are trying to retrieve
+*Return: 0 for success else error
+*/
+
+int GetDisplacementOfInstruction(BYTE* Buffer, int index, int nSize, Instruction* pInst)
+{
+	int nRetVal = 0;
+	char arTemp1[5] = {0};
+	char arTemp2[5] = {0};
+	char arTemp3[5] = {0};
+	char arTemp4[5] = {0};
+
+	//pInst->bDisplacementExists = true;
+	pInst->DisplacementSize = nSize;
+	pInst->Displacement = 0;
+
+	if(pInst->DisplacementSize == 1)
+	{
+		sprintf_s(arTemp1,sizeof(char)*5, "%x", Buffer[index]);
+		if(strlen(arTemp1) == 1)
+		{
+			arTemp1[1] = arTemp1[0];
+			arTemp1[0] = '0';
+		}
+		pInst->Displacement = HexCharToInt(arTemp1[1])*1+ HexCharToInt(arTemp1[0])*16;
+
+		//sprintf(strRawInstruction, "%s%x ",strRawInstruction, Buffer[index]);
+	}
+	else if(pInst->DisplacementSize == 2)
+	{
+		sprintf_s(arTemp1,sizeof(char)*5, "%x", Buffer[index]);
+		if(strlen(arTemp1) == 1)
+		{
+			arTemp1[1] = arTemp1[0];
+			arTemp1[0] = '0';
+		}
+		//sprintf(strRawInstruction, "%s%x ",strRawInstruction, Buffer[index]);
+		sprintf_s(arTemp2,sizeof(char)*5, "%x", Buffer[index+1]);
+		if(strlen(arTemp2) == 1)
+		{
+			arTemp2[1] = arTemp2[0];
+			arTemp2[0] = '0';
+		}
+		//sprintf(strRawInstruction, "%s%x ",strRawInstruction, Buffer[index+1]);
+
+		pInst->Displacement = HexCharToInt(arTemp1[1])*1 + HexCharToInt(arTemp1[0])*16 + HexCharToInt(arTemp2[1])*256 + HexCharToInt(arTemp2[0])*4096; 
+	}
+	else if(pInst->DisplacementSize == 4)
+	{
+		sprintf_s(arTemp1,sizeof(char)*5, "%x", Buffer[index]);
+		if(strlen(arTemp1) == 1)
+		{
+			arTemp1[1] = arTemp1[0];
+			arTemp1[0] = '0';
+		}
+		//sprintf(strRawInstruction, "%s%x ",strRawInstruction, Buffer[index]);
+		sprintf_s(arTemp2,sizeof(char)*5, "%x", Buffer[index+1]);
+		if(strlen(arTemp2) == 1)
+		{
+			arTemp2[1] = arTemp2[0];
+			arTemp2[0] = '0';
+		}
+		//sprintf(strRawInstruction, "%s%x ",strRawInstruction, Buffer[index+1]);
+		sprintf_s(arTemp3,sizeof(char)*5, "%x", Buffer[index+2]);
+		if(strlen(arTemp3) == 1)
+		{
+			arTemp3[1] = arTemp3[0];
+			arTemp3[0] = '0';
+		}
+		//sprintf(strRawInstruction, "%s%x ",strRawInstruction, Buffer[index+2]);
+		sprintf_s(arTemp4,sizeof(char)*5, "%x", Buffer[index+3]);
+		if(strlen(arTemp4) == 1)
+		{
+			arTemp4[1] = arTemp4[0];
+			arTemp4[0] = '0';
+		}
+		//sprintf(strRawInstruction, "%s%x ",strRawInstruction, Buffer[index+3]);
+		
+
+		pInst->Displacement = HexCharToInt(arTemp1[1])*1 + HexCharToInt(arTemp1[0])*16 + HexCharToInt(arTemp2[1])*256 + HexCharToInt(arTemp2[0])*4096 + HexCharToInt(arTemp3[1])*65536 + HexCharToInt(arTemp3[0])*1048576 + HexCharToInt(arTemp4[1])*16777216 + HexCharToInt(arTemp4[0])*268435456;
+	}
+
+	return nRetVal;
+}
+
+/*
+*Name: GetImmediateOfInstruction
+*Description: This will get the actual value of the immediate value of the instruction.
+*Parameters: Buffer - the raw byte array containing instructions
+*			 index - Current index where the immediate value is going to start
+*			 pInst - Instruction structure where I am storing it
+*ReturnValue: 0 for success else error
+*/
+int GetImmediateOfInstruction(BYTE* Buffer, int index, int nSize, Instruction* pInst)
+{
+	int nRetVal = 0;
+	char arTemp1[5] = {0};
+	char arTemp2[5] = {0};
+	char arTemp3[5] = {0};
+	char arTemp4[5] = {0};
+
+	//pInst->bImmediateExists = true;
+
+	pInst->ImmediateSize = nSize;
+	pInst->Immediate = 0;
+
+	if(pInst->ImmediateSize == 1)
+	{
+		sprintf_s(arTemp1,sizeof(char)*5, "%x", Buffer[index]);
+		if(strlen(arTemp1) == 1)
+		{
+			arTemp1[1] = arTemp1[0];
+			arTemp1[0] = '0';
+		}
+		pInst->Immediate = HexCharToInt(arTemp1[1])*1+ HexCharToInt(arTemp1[0])*16;
+	}
+	else if(pInst->ImmediateSize == 2)
+	{
+		sprintf_s(arTemp1,sizeof(char)*5, "%x", Buffer[index]);
+		if(strlen(arTemp1) == 1)
+		{
+			arTemp1[1] = arTemp1[0];
+			arTemp1[0] = '0';
+		}
+		sprintf_s(arTemp2,sizeof(char)*5, "%x", Buffer[index+1]);
+		if(strlen(arTemp2) == 1)
+		{
+			arTemp2[1] = arTemp2[0];
+			arTemp2[0] = '0';
+		}
+
+		pInst->Immediate = HexCharToInt(arTemp1[1])*1 + HexCharToInt(arTemp1[0])*16 + HexCharToInt(arTemp2[1])*256 + HexCharToInt(arTemp2[0])*4096; 
+	}
+	else if(pInst->ImmediateSize == 4)
+	{
+		sprintf_s(arTemp1,sizeof(char)*5, "%x", Buffer[index]);
+		if(strlen(arTemp1) == 1)
+		{
+			arTemp1[1] = arTemp1[0];
+			arTemp1[0] = '0';
+		}
+		sprintf_s(arTemp2,sizeof(char)*5, "%x", Buffer[index+1]);
+		if(strlen(arTemp2) == 1)
+		{
+			arTemp2[1] = arTemp2[0];
+			arTemp2[0] = '0';
+		}
+		sprintf_s(arTemp3,sizeof(char)*5, "%x", Buffer[index+2]);
+		if(strlen(arTemp3) == 1)
+		{
+			arTemp3[1] = arTemp3[0];
+			arTemp3[0] = '0';
+		}
+		sprintf_s(arTemp4,sizeof(char)*5, "%x", Buffer[index+3]);
+		if(strlen(arTemp4) == 1)
+		{
+			arTemp4[1] = arTemp4[0];
+			arTemp4[0] = '0';
+		}
+
+		pInst->Immediate = HexCharToInt(arTemp1[1])*1 + HexCharToInt(arTemp1[0])*16 + HexCharToInt(arTemp2[1])*256 + HexCharToInt(arTemp2[0])*4096 + HexCharToInt(arTemp3[1])*65536 + HexCharToInt(arTemp3[0])*1048576 + HexCharToInt(arTemp4[1])*16777216 + HexCharToInt(arTemp4[0])*268435456;
+	}
+
+	return nRetVal;
+}
+
+/*
 *Name: ParseModRegRMByte
 *Description: This function decodes the moderegbyte and gives the subsequent values of it;
 *Parameter: byModeRegRM - actual ModRegRM byte
@@ -2041,22 +2501,40 @@ int ParseSIBByte(BYTE bySIB, SIB* pSIB)
 }
 
 /*
+*Name: GetActualInstruction
+*Description: This will create the string of the actual human readable instruciton
+*Parameter: strCompInstruction - This will have the actual instruction in an array
+*Return: string copied to heap from the array [strCompInstruction]
+*/
+char* GetActualInstruction(char* strCompInstruction)
+{
+	char* strInstruction = NULL;
+
+	strInstruction = (char*)malloc(sizeof(char)*strlen(strCompInstruction)+1);
+	memset(strInstruction, '\0', strlen(strCompInstruction)+1);
+
+	strcpy_s(strInstruction, strlen(strCompInstruction), strCompInstruction);
+
+	return strInstruction;
+}
+
+/*
 *Name: DecodeADD
 *Description: This function decode all the opcodes which are pertaining to single byte OPCODE of ADD instruction.
 *Parameters: byOpcode - Actual opcode,
-			 byarPrefix - list of prefixes
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
 *Return: 0 For success else some error has occured.
 */
-int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
+int DecodeADD(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
-	BYTE* byarTempOpcode = NULL;
 
-	char strOperand1[1024] = {0};
-	char strOperand2[1024] = {0};
 	char strCompInstruction[1024] = {0};
-	char strRawInstruction[1024] = {0};
-	int i = 0;
+	
+	//int i = 0;
 
 	SIB* pSIB = NULL;
 	ModRegRM* pModRegRM = NULL;
@@ -2066,46 +2544,17 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 	case 0x00:
 		{
 			//ADD Eb, Gb
-			pInst = (Instruction*)malloc(sizeof(Instruction));
-			byarTempOpcode = (BYTE*)malloc(sizeof(BYTE)*1);
-			byarTempOpcode[0] = byOpcode;
-			pInst->OpcodePart = byarTempOpcode;
-			pInst->OpcodeSize = 1;
-			pInst->PrefixSize = nPrefixSize;
-			pInst->PrefixPart = byarPrefix;
+			//pInst = GetAnInstruction(byOpcode, nPrefixSize, byarPrefix);
 			pInst->bmodRMExists = true;
-			pInst->bSibExists = false;
-			pInst->Displacement = 0;
-			pInst->DisplacementSize = 0;
-			pInst->Immediate = 0;
-			pInst->ImmediateSize = 0;
-			pInst->sibpart = 0;
-			pInst->LengthOfInstruction = pInst->PrefixSize + 1;
 
-			if(nPrefixSize > 0)
-			{
-				sprintf(strRawInstruction, "%x ", byarPrefix[i++]);
-
-				while(i < nPrefixSize)
-				{
-					sprintf(strRawInstruction, "%s%x ", strRawInstruction, byarPrefix[i++]);
-				}
-
-				sprintf(strRawInstruction, "%s%x ", strRawInstruction, byOpcode);
-			}
-			else
-			{
-				sprintf(strRawInstruction, "%x ", byOpcode);
-			}
-
-
+			
 			nCurrentIndex++;
 			pInst->LengthOfInstruction++;
 
 			if(nCurrentIndex < nSize)
 			{
 				pInst->modrmpart = byarRawCode[nCurrentIndex];
-				sprintf(strRawInstruction, "%s%x ",strRawInstruction, pInst->modrmpart);
+				
 				pInst->bmodRMExists = true;
 				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
 				if(pModRegRM != NULL)
@@ -2123,7 +2572,7 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 								{
 									pInst->bSibExists = true;
 									pInst->sibpart = byarRawCode[nCurrentIndex];
-									sprintf(strRawInstruction, "%s%x ",strRawInstruction, pInst->sibpart);
+									
 									ParseSIBByte(pInst->sibpart, pSIB);
 									if(pSIB != NULL)
 									{
@@ -2131,19 +2580,10 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 										{
 											//Get Displacement 32 bits
 											
-											pInst->DisplacementSize = 4;
-											pInst->Displacement = 0;
-											i = 0;
-											while(nCurrentIndex+1 < nSize && i < 4)
-											{
-												nCurrentIndex++;
-												pInst->LengthOfInstruction++;
-												pInst->Displacement += byarRawCode[nCurrentIndex];
-												sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
-												
-												i++;
-											}
-
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+											
 											if(4 != pSIB->index)
 												sprintf(strCompInstruction, "ADD byte ptr [%x+%d*%s], ", pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
 											else
@@ -2166,17 +2606,10 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 							{
 								//Get Displacement 32 bits
 								
-								pInst->DisplacementSize = 4;
-								pInst->Displacement = 0;
-								i = 0;
-								while(nCurrentIndex+1 < nSize && i < 4)
-								{
-									nCurrentIndex++;
-									pInst->LengthOfInstruction++;
-									pInst->Displacement += byarRawCode[nCurrentIndex];
-									sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
-									i++;
-								}
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+											
 
 								sprintf(strCompInstruction, "ADD byte ptr [%x], ", pInst->Displacement);
 
@@ -2199,22 +2632,13 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 								{
 									pInst->bSibExists = true;
 									pInst->sibpart = byarRawCode[nCurrentIndex];
-									sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
+									
 									ParseSIBByte(pInst->sibpart, pSIB);
 
-									pInst->DisplacementSize = 1;
-									pInst->Displacement = 0;
-									i = 0;
-									while(nCurrentIndex+1 < nSize && i < 1)
-									{
-										
-										nCurrentIndex++;
-										pInst->LengthOfInstruction++;
-										pInst->Displacement += byarRawCode[nCurrentIndex];
-										sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
-										
-										i++;
-									}
+									//GetDisplacement 8 bits
+									GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+									pInst->LengthOfInstruction+= 1;
+									nCurrentIndex+=1;
 
 									if(pSIB != NULL)
 									{
@@ -2247,18 +2671,9 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 							}
 							else
 							{
-								pInst->DisplacementSize = 1;
-								pInst->Displacement = 0;
-								i = 0;
-								while(nCurrentIndex+1 < nSize && i < 1)
-								{
-									
-									nCurrentIndex++;
-									pInst->LengthOfInstruction++;
-									pInst->Displacement += byarRawCode[nCurrentIndex];
-									sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
-									i++;
-								}
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
 
 								sprintf(strCompInstruction, "ADD byte ptr [%s+%x], ", archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
 
@@ -2276,21 +2691,12 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 								{
 									pInst->bSibExists = true;
 									pInst->sibpart = byarRawCode[nCurrentIndex];
-									sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
+									
 									ParseSIBByte(pInst->sibpart, pSIB);
 
-									pInst->DisplacementSize = 4;
-									pInst->Displacement = 0;
-									i = 0;
-									while(nCurrentIndex+1 < nSize && i < 4)
-									{
-										
-										nCurrentIndex++;
-										pInst->LengthOfInstruction++;
-										pInst->Displacement += byarRawCode[nCurrentIndex];
-										sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
-										i++;
-									}
+									GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+									pInst->LengthOfInstruction+= 4;
+									nCurrentIndex+=4;
 
 									if(pSIB != NULL)
 									{
@@ -2319,18 +2725,9 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 							}
 							else
 							{
-								pInst->DisplacementSize = 4;
-								pInst->Displacement = 0;
-								i = 0;
-								while(nCurrentIndex+1 < nSize && i < 4)
-								{
-									
-									nCurrentIndex++;
-									pInst->LengthOfInstruction++;
-									pInst->Displacement += byarRawCode[nCurrentIndex];
-									sprintf(strRawInstruction, "%s%x ",strRawInstruction, byarRawCode[nCurrentIndex]);
-									i++;
-								}
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
 
 								sprintf(strCompInstruction, "ADD byte ptr [%s+%x], ", archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
 							}
@@ -2352,17 +2749,7 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 					
 					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_8[pModRegRM->reg]);
 
-					pInst->actualInstruction = (char*)malloc(sizeof(char)*strlen(strCompInstruction)+1);
-					memset(pInst->actualInstruction, '\0', strlen(strCompInstruction)+1);
-
-					strcpy_s(pInst->actualInstruction, strlen(strCompInstruction), strCompInstruction);
-
-					pInst->encodedInstruction = (char*)malloc(sizeof(char)*strlen(strRawInstruction)+1);
-					memset(pInst->encodedInstruction, '\0', strlen(strRawInstruction)+1);
-
-					strcpy_s(pInst->encodedInstruction, strlen(strRawInstruction), strRawInstruction);
-
-
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 
 					free(pModRegRM);
 				}
@@ -2384,48 +2771,259 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 	case 0x01:
 		{
 			//ADD Ev,Gv
-			pInst = (Instruction*)malloc(sizeof(Instruction));
-			byarTempOpcode = (BYTE*)malloc(sizeof(BYTE)*1);
-			byarTempOpcode[0] = byOpcode;
-			pInst->OpcodePart = byarTempOpcode;
-			pInst->OpcodeSize = 1;
-			pInst->PrefixSize = nPrefixSize;
-			pInst->PrefixPart = byarPrefix;
+			//pInst = GetAnInstruction(byOpcode, nPrefixSize, byarPrefix);
 			pInst->bmodRMExists = true;
-			pInst->bSibExists = false;
-			pInst->Displacement = 0;
-			pInst->DisplacementSize = 0;
-			pInst->Immediate = 0;
-			pInst->ImmediateSize = 0;
-			pInst->sibpart = 0;
-			pInst->LengthOfInstruction = pInst->PrefixSize + 1;
-
-			if(nPrefixSize > 0)
-			{
-				sprintf(strRawInstruction, "%x ", byarPrefix[i++]);
-
-				while(i < nPrefixSize)
-				{
-					sprintf(strRawInstruction, "%s%x ", strRawInstruction, byarPrefix[i++]);
-				}
-
-				sprintf(strRawInstruction, "%s%x ", strRawInstruction, byOpcode);
-			}
-			else
-			{
-				sprintf(strRawInstruction, "%x ", byOpcode);
-			}
-
-
+			
 			nCurrentIndex++;
 			pInst->LengthOfInstruction++;
 
 			if(nCurrentIndex < nSize)
 			{
 				pInst->modrmpart = byarRawCode[nCurrentIndex];
-				sprintf(strRawInstruction, "%s%x ",strRawInstruction, pInst->modrmpart);
+				
 				pInst->bmodRMExists = true;
 				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "ADD WORD ptr [%x+%d*%s], ", pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "ADD WORD ptr [%s], ", archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "ADD WORD ptr [%d*%s+%s], ", pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "ADD WORD ptr [%s], ", archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "ADD WORD ptr [%x], ", pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "ADD WORD ptr [%s], ",archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "ADD WORD ptr [%x+%d*%s+EBP], ",pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "ADD WORD ptr [%x+EBP], ", pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "ADD WORD ptr [%x+%d*%s+%s], ",pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "ADD WORD ptr [%x+%s], ", pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "ADD WORD ptr [%s+%x], ", archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "ADD WORD ptr [%x+%d*%s+EBP], ",pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "ADD WORD ptr [%x+EBP], ", pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "ADD WORD ptr [%x+%d*%s+%s], ",pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "ADD WORD ptr [%x+%s], ", pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "ADD WORD ptr [%s+%x], ", archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "ADD %s, ", archREGFields_32[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gv
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_32[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
 			}
 			else
 			{
@@ -2437,21 +3035,620 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 	case 0x02:
 		{
 			//Gb,Eb
+			//pInst = GetAnInstruction(byOpcode, nPrefixSize, byarPrefix);
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gb
+					sprintf(strCompInstruction, "ADD %s, ",archREGFields_8[pModRegRM->reg]);
+
+					//Eb
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_8[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+
+
+
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
+
 			break;
 		}
 	case 0x03:
 		{
 			//Gv,Ev
+			//pInst = GetAnInstruction(byOpcode, nPrefixSize, byarPrefix);
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gv
+					sprintf(strCompInstruction, "ADD %s, ",archREGFields_32[pModRegRM->reg]);
+
+					//Ev
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_32[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+
+
+
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x04:
 		{
 			//AL,lb
+			//pInst = GetAnInstruction(byOpcode, nPrefixSize, byarPrefix);
+
+			//Get the immediate value
+			//nCurrentIndex++;
+			
+			if(nCurrentIndex+1 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 1, pInst);
+				pInst->LengthOfInstruction++;
+				nCurrentIndex++;
+
+				sprintf(strCompInstruction, "ADD AL, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
+
 			break;
 		}
 	case 0x05:
 		{
 			//rAX, lz
+			//pInst = GetAnInstruction(byOpcode, nPrefixSize, byarPrefix);
+
+			
+			
+			if(nCurrentIndex+4 < nSize)
+			{
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+				nCurrentIndex+=4;
+				pInst->LengthOfInstruction+=4;
+
+				sprintf(strCompInstruction, "ADD EAX, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
+
 			break;
 		}
 	default:
@@ -2463,130 +3660,255 @@ int DecodeADD(BYTE byOpcode, BYTE* byarPrefix, int nPrefixSize, BYTE* byarRawCod
 	return nReturnValue;
 }
 
-int DecodePushPoP(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodePushPoP
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of PUSH and POP instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodePushPoP(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+
+	char strCompInstruction[1024] = {0};
 
 	switch(byOpcode)
 	{
 	case 0x06:
 		{
+			//PUSH ES i64
+			sprintf(strCompInstruction, "PUSH ES");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
 			break;
 		}
 	case 0x07:
 		{
+			//POP ES i64
+			sprintf(strCompInstruction, "POP ES");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x0E:
 		{
+			//PUSH CS i64
+			sprintf(strCompInstruction, "PUSH CS");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x16:
 		{
+			//PUSH SS i64
+			sprintf(strCompInstruction, "PUSH SS");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x17:
 		{
+			//POP SS i64
+			sprintf(strCompInstruction, "POP SS");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x1E:
 		{
+			//PUSH DS i64
+			sprintf(strCompInstruction, "PUSH DS");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x1F:
 		{
+			//POP DS i64
+			sprintf(strCompInstruction, "POP DS");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x50:
 		{
+			//PUSH rAX/r8
+			sprintf(strCompInstruction, "PUSH EAX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x51:
 		{
+			//PUSH rCX/r9
+			sprintf(strCompInstruction, "PUSH ECX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x52:
 		{
+			//PUSH rDX/r10
+			sprintf(strCompInstruction, "PUSH EDX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x53:
 		{
+			//PUSH rBX/r11
+			sprintf(strCompInstruction, "PUSH EBX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x54:
 		{
+			//PUSH rSP/r12
+			sprintf(strCompInstruction, "PUSH ESP");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x55:
 		{
+			//PUSH rBP/r13
+			sprintf(strCompInstruction, "PUSH EBP");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x56:
 		{
+			//PUSH rSI/r14
+			sprintf(strCompInstruction, "PUSH ESI");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x57:
 		{
+			//PUSH rDI/r15
+			sprintf(strCompInstruction, "PUSH EDI");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x58:
 		{
+			//POP rAX/r8
+			sprintf(strCompInstruction, "POP EAX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x59:
 		{
+			//POP rCX/r9
+			sprintf(strCompInstruction, "POP ECX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x5A:
 		{
+			//POP rDX/r10
+			sprintf(strCompInstruction, "POP EDX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x5B:
 		{
+			//POP rBX/r11
+			sprintf(strCompInstruction, "POP EBX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x5C:
 		{
+			//POP rSP/r12
+			sprintf(strCompInstruction, "POP ESP");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x5D:
 		{
+			//POP rBP/r13
+			sprintf(strCompInstruction, "POP EBP");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x5E:
 		{
+			//POP rSI/r14
+			sprintf(strCompInstruction, "POP ESI");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x5F:
 		{
+			//POP rDI/r15
+			sprintf(strCompInstruction, "POP EDI");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x60:
 		{
+			//PUSHA / PUSHAD
+			sprintf(strCompInstruction, "PUSHAD");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x61:
 		{
+			//POPA / POPAD
+			sprintf(strCompInstruction, "POPAD");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x68:
 		{
+			//PUSH d64 Iz
+			if(nCurrentIndex+4 < nSize)
+			{
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+				nCurrentIndex+=4;
+				pInst->LengthOfInstruction+=4;
+
+				sprintf(strCompInstruction, "PUSH %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	case 0x6A:
 		{
+			//PUSH d64 Ib
+			if(nCurrentIndex+1 < nSize)
+			{
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+				nCurrentIndex+=1;
+				pInst->LengthOfInstruction+=1;
+
+				sprintf(strCompInstruction, "PUSH %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	case 0x9C:
 		{
+			//PUSHF/D/Q d64 Fv
+			sprintf(strCompInstruction, "PUSHFD");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x9D:
 		{
+			//POPF/D/Q d64 Fv
+			sprintf(strCompInstruction, "POPFD");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	default:
 		{
+			//ERROR
 			break;
 		}
 	}
@@ -2594,34 +3916,1151 @@ int DecodePushPoP(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-int DecodeOR(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeOR
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of OR instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeOR(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+	char strCompInstruction[1024] = {'\0'};
+
+	SIB* pSIB = NULL;
+	ModRegRM* pModRegRM = NULL;
 
 	switch(byOpcode)
 	{
 	case 0x08:
 		{
+			//OR Eb,Gb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"OR ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_32[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gv
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_32[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x09:
 		{
+			//OR Ev, Gv
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"OR ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_32[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gv
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_32[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x0A:
 		{
+			//OR Gb,Eb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gb
+					sprintf(strCompInstruction, "OR %s, ",archREGFields_8[pModRegRM->reg]);
+
+					//Eb
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_8[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x0B:
 		{
+			//OR Gv, Ev
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gv
+					sprintf(strCompInstruction, "OR %s, ",archREGFields_32[pModRegRM->reg]);
+
+					//Ev
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_32[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x0C:
 		{
+			//OR AL, Ib
+			if(nCurrentIndex+1 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 1, pInst);
+				pInst->LengthOfInstruction++;
+				nCurrentIndex++;
+
+				sprintf(strCompInstruction, "OR AL, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	case 0x0D:
 		{
+			//OR rAX, Iz
+			if(nCurrentIndex+4 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 4, pInst);
+				pInst->LengthOfInstruction += 4;
+				nCurrentIndex += 4;
+
+				sprintf(strCompInstruction, "OR EAX, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	default:
@@ -2633,34 +5072,1152 @@ int DecodeOR(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-int DecodeADC(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeADC
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of ADC instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeADC(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+
+	char strCompInstruction[1024] = {'\0'};
+
+	SIB* pSIB = NULL;
+	ModRegRM* pModRegRM = NULL;
 
 	switch(byOpcode)
 	{
 	case 0x10:
 		{
+			//ADC Eb,Gb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"ADC ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_32[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gv
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_32[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x11:
 		{
+			//ADC Ev,Gv
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"ADC ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_32[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gv
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_32[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x12:
 		{
+			//ADC Gb, Eb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gb
+					sprintf(strCompInstruction, "ADC %s, ",archREGFields_8[pModRegRM->reg]);
+
+					//Eb
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_8[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x13:
 		{
+			//ADC Gv, Ev
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gv
+					sprintf(strCompInstruction, "ADC %s, ",archREGFields_32[pModRegRM->reg]);
+
+					//Ev
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_32[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x14:
 		{
+			//ADC AL, Ib
+			if(nCurrentIndex+1 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 1, pInst);
+				pInst->LengthOfInstruction++;
+				nCurrentIndex++;
+
+				sprintf(strCompInstruction, "ADC AL, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	case 0x15:
 		{
+			//ADC rAX, Iz
+			if(nCurrentIndex+4 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 4, pInst);
+				pInst->LengthOfInstruction += 4;
+				nCurrentIndex += 4;
+
+				sprintf(strCompInstruction, "ADC EAX, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	default:
@@ -2672,34 +6229,1151 @@ int DecodeADC(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-int DecodeSBB(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeSBB
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of SBB instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeSBB(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+	char strCompInstruction[1024] = {'\0'};
+
+	SIB* pSIB = NULL;
+	ModRegRM* pModRegRM = NULL;
 
 	switch(byOpcode)
 	{
 	case 0x18:
 		{
+			//SBB Eb,Gb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"SBB ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_32[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gv
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_32[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x19:
 		{
+			//SBB Ev,Gv
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"SBB ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_32[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gv
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_32[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x1A:
 		{
+			//SBB Gb,Eb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gb
+					sprintf(strCompInstruction, "SBB %s, ",archREGFields_8[pModRegRM->reg]);
+
+					//Eb
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_8[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x1B:
 		{
+			//SBB Gv,Ev
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gv
+					sprintf(strCompInstruction, "SBB %s, ",archREGFields_32[pModRegRM->reg]);
+
+					//Ev
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_32[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x1C:
 		{
+			//SBB AL, Ib
+			if(nCurrentIndex+1 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 1, pInst);
+				pInst->LengthOfInstruction++;
+				nCurrentIndex++;
+
+				sprintf(strCompInstruction, "SBB AL, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	case 0x1D:
 		{
+			//SBB rAX, Iz
+			if(nCurrentIndex+4 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 4, pInst);
+				pInst->LengthOfInstruction += 4;
+				nCurrentIndex += 4;
+
+				sprintf(strCompInstruction, "SBB EAX, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	default:
@@ -2712,34 +7386,1153 @@ int DecodeSBB(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-int DecodeAND(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeAND
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of AND instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeAND(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+
+	char strCompInstruction[1024] = {'\0'};
+
+	SIB* pSIB = NULL;
+	ModRegRM* pModRegRM = NULL;
 
 	switch(byOpcode)
 	{
 	case 0x20:
 		{
+			//AND Eb, Gb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"AND ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_32[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gv
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_32[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x21:
 		{
+			//AND Ev, Gv
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"AND ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_32[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gv
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_32[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x22:
 		{
+			//AND Gb, Eb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gb
+					sprintf(strCompInstruction, "AND %s, ",archREGFields_8[pModRegRM->reg]);
+
+					//Eb
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_8[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x23:
 		{
+			//AND Gv, Ev
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gv
+					sprintf(strCompInstruction, "AND %s, ",archREGFields_32[pModRegRM->reg]);
+
+					//Ev
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_32[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
+			
 			break;
 		}
 	case 0x24:
 		{
+			//AND AL, Ib
+			if(nCurrentIndex+1 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 1, pInst);
+				pInst->LengthOfInstruction++;
+				nCurrentIndex++;
+
+				sprintf(strCompInstruction, "AND AL, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	case 0x25:
 		{
+			//AND rAX, Iz
+			if(nCurrentIndex+4 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 4, pInst);
+				pInst->LengthOfInstruction += 4;
+				nCurrentIndex += 4;
+
+				sprintf(strCompInstruction, "AND EAX, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	default:
@@ -2751,18 +8544,34 @@ int DecodeAND(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-int DecodeDAA(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeDAA
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of DAA instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeDAA(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+
+	char* strCompInstruction[1024] = {'\0'};
 
 	switch(byOpcode)
 	{
 	case 0x27:
 		{
+			//DAA i64
+			sprintf(strCompInstruction, "DAA");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	default:
 		{
+			//ERROR
 			break;
 		}
 	}
@@ -2770,34 +8579,1151 @@ int DecodeDAA(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-int DecodeSUB(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeSUB
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of SUB instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeSUB(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+	char strCompInstruction[1024] = {'\0'};
+
+	SIB* pSIB = NULL;
+	ModRegRM* pModRegRM = NULL;
 
 	switch(byOpcode)
 	{
 	case 0x28:
 		{
+			//SUB Eb,Gb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"SUB ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_8[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gb
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_8[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x29:
 		{
+			//SUB Ev,Gv
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"SUB ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_32[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gv
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_32[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x2A:
 		{
+			//SUB Gb,Eb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gb
+					sprintf(strCompInstruction, "SUB %s, ",archREGFields_8[pModRegRM->reg]);
+
+					//Eb
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_8[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x2B:
 		{
+			//SUB Gv,Ev
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gv
+					sprintf(strCompInstruction, "SUB %s, ",archREGFields_32[pModRegRM->reg]);
+
+					//Ev
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_32[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x2C:
 		{
+			//SUB AL,Ib
+			if(nCurrentIndex+1 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 1, pInst);
+				pInst->LengthOfInstruction++;
+				nCurrentIndex++;
+
+				sprintf(strCompInstruction, "SUB AL, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	case 0x2D:
 		{
+			//SUB rAZ, Iz
+			if(nCurrentIndex+4 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 4, pInst);
+				pInst->LengthOfInstruction += 4;
+				nCurrentIndex += 4;
+
+				sprintf(strCompInstruction, "SUB EAX, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	default:
@@ -2809,14 +9735,29 @@ int DecodeSUB(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-int DecodeDAS(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeDAS
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of DAS instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeDAS(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+
+	char strCompInstruction[1024] = {'\0'};
 
 	switch(byOpcode)
 	{
 	case 0x2F:
 		{
+			//DAS i64
+			sprintf(strCompInstruction, "DAS");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	default:
@@ -2828,34 +9769,1152 @@ int DecodeDAS(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-int DecodeXOR(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeXOR
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of XOR instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeXOR(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+
+	char strCompInstruction[1024] = {'\0'};
+
+	SIB* pSIB = NULL;
+	ModRegRM* pModRegRM = NULL;
 
 	switch(byOpcode)
 	{
 	case 0x30:
 		{
+			//XOR Eb,Gb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"XOR ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_8[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gb
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_8[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x31:
 		{
+			//XOR Ev,Gv
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"XOR ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_32[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gv
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_32[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x32:
 		{
+			//XOR Gb,Eb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gb
+					sprintf(strCompInstruction, "XOR %s, ",archREGFields_8[pModRegRM->reg]);
+
+					//Eb
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_8[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x33:
 		{
+			//XOR Gv,Ev
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gv
+					sprintf(strCompInstruction, "XOR %s, ",archREGFields_32[pModRegRM->reg]);
+
+					//Ev
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_32[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x34:
 		{
+			//XOR AL,Ib
+			if(nCurrentIndex+1 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 1, pInst);
+				pInst->LengthOfInstruction++;
+				nCurrentIndex++;
+
+				sprintf(strCompInstruction, "XOR AL, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	case 0x35:
 		{
+			//XOR rAX, Iz
+			if(nCurrentIndex+4 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 4, pInst);
+				pInst->LengthOfInstruction += 4;
+				nCurrentIndex += 4;
+
+				sprintf(strCompInstruction, "XOR EAX, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	default:
@@ -2867,14 +10926,29 @@ int DecodeXOR(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-int DecodeAAA(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeAAA
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of AAA instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeAAA(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+
+	char strCompInstruction[1024] = {'\0'};
 
 	switch(byOpcode)
 	{
 	case 0x37:
 		{
+			//AAA i64
+			sprintf(strCompInstruction,"AAA");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	default:
@@ -2886,42 +10960,1166 @@ int DecodeAAA(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-int DecodeCMP(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeCMP
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of CMP instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeCMP(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+
+	char strCompInstruction[1024] = {'\0'};
+
+	SIB* pSIB = NULL;
+	ModRegRM* pModRegRM = NULL;
 
 	switch(byOpcode)
 	{
 	case 0x38:
 		{
+			//CMP Eb,Gb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"CMP ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sbyte ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_8[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gb
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_8[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x39:
 		{
+			//CMP Ev,Gv
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					//Ev
+					sprintf(strCompInstruction,"CMP ");
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										if(pSIB->base == 5)
+										{
+											//Get the Displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%d*%s+%s], ",strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%s], ", strCompInstruction,archSIBBase[pSIB->base]);
+											}
+
+										}
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else if(pModRegRM->rm == 5)
+							{
+								//Get the displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%x], ",strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr [%s], ",strCompInstruction ,archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+									if(pSIB != NULL)
+									{
+										//Get the Displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction += 1;
+										nCurrentIndex+=1;
+
+										if(pSIB->base == 5)
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ",strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ",strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(pSIB->index != 4)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ", strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+									}
+									else
+									{
+										//Error
+									}
+
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+								//Get Displacement 8 bits
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ",strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(pModRegRM->rm == 4)
+							{
+								//Get the SIB BYTE
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+
+
+									if(pSIB != NULL)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											//Get Displacement 32 bits
+
+											if(4 != pSIB->index)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+EBP], ", strCompInstruction,pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+EBP], ", strCompInstruction, pInst->Displacement);
+										}
+										else
+										{
+											if(pSIB->index != 4)
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%d*%s+%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											else
+												sprintf(strCompInstruction, "%sWORD ptr [%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
+										}
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR
+									}
+
+								}
+								else
+								{
+									//ERROR
+								}
+							}
+							else
+							{
+
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_32[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+					
+					//Gv
+					sprintf(strCompInstruction, "%s%s",strCompInstruction, archREGFields_32[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//Error
+				}
+			}
+			else
+			{
+				//Error
+			}
 			break;
 		}
 	case 0x3A:
 		{
+			//CMP Gb,Eb
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gb
+					sprintf(strCompInstruction, "CMP %s, ",archREGFields_8[pModRegRM->reg]);
+
+					//Eb
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sbyte ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_8[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x3B:
 		{
+			//CMP Gv,Ev
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			pInst->LengthOfInstruction++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gv
+					sprintf(strCompInstruction, "CMP %s, ",archREGFields_32[pModRegRM->reg]);
+
+					//Ev
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s]",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%x]",strCompInstruction,pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr[%s]",strCompInstruction,archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+											pInst->LengthOfInstruction+= 1;
+											nCurrentIndex+=1;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+
+							}
+
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								pInst->LengthOfInstruction++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+%d*%s+EBP]",strCompInstruction,pInst->Displacement,pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%x+EBP]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sWORD ptr[%s+%d*%s+%x]",strCompInstruction,archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index], pInst->Displacement);
+											}
+											else
+											{
+												sprintf(strCompInstruction,"%sWORD ptr[%s+%x]",strCompInstruction, archSIBBase[pSIB->base]+pInst->Displacement);
+											}
+
+										}
+
+
+										free(pSIB);
+
+									}
+									else
+									{
+										//ERROR SIB is NULL
+									}
+								}
+								else
+								{
+									//Error exceeded byte array limit
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sWORD ptr[%s+%x]", strCompInstruction, archMODRMFields_32[pModRegRM->rm], pInst->Displacement);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s",strCompInstruction,archREGFields_32[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+
+					}
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+
+
+				}
+				else
+				{
+					//ERROR PModRegRM is null
+				}
+
+			}
+			else
+			{
+				//ERROR size exceeded
+			}
 			break;
 		}
 	case 0x3C:
 		{
+			//CMP AL, Ib
+			if(nCurrentIndex+1 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 1, pInst);
+				pInst->LengthOfInstruction++;
+				nCurrentIndex++;
+
+				sprintf(strCompInstruction, "CMP AL, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	case 0x3D:
 		{
+			//CMP rAz, Iz
+			if(nCurrentIndex+4 < nSize)
+			{
+				
+				GetImmediateOfInstruction(byarRawCode, nCurrentIndex, 4, pInst);
+				pInst->LengthOfInstruction += 4;
+				nCurrentIndex += 4;
+
+				sprintf(strCompInstruction, "CMP EAX, %x", pInst->Immediate);
+
+				pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+
+			}
+			else
+			{
+				//Error Size of the index has exceeded
+			}
 			break;
 		}
 	case 0xA6:
 		{
+			//CMPS/B Xb,Yb
+			sprintf(strCompInstruction, "CMPSB byte ptr [DS:SI], byte ptr [ES:DI]");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0xA7:
 		{
+			//CMPS/W/D Xv,Yv
+			sprintf(strCompInstruction, "CMPSD WORD ptr [DS:SI], WORD ptr [ES:DI]");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	default:
@@ -2933,14 +12131,29 @@ int DecodeCMP(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-int DecodeAAS(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeAAS
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of AAS instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeAAS(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+
+	char strCompInstruction[1024] = {'\0'};
 
 	switch(byOpcode)
 	{
 	case 0x3F:
 		{
+			//AAS i64
+			sprintf(strCompInstruction, "AAS");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	default:
@@ -2953,42 +12166,78 @@ int DecodeAAS(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-int DecodeINC(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeINC
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of INC instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeINC(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+
+	char strCompInstruction[1024] = {'\0'};
 
 	switch(byOpcode)
 	{
 	case 0x40:
 		{
+			//INC eAX
+			sprintf(strCompInstruction, "INC EAX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x41:
 		{
+			//INC eCX
+			sprintf(strCompInstruction, "INC ECX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x42:
 		{
+			//INC eDX
+			sprintf(strCompInstruction, "INC EDX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x43:
 		{
+			//INC eBX
+			sprintf(strCompInstruction, "INC EBX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x44:
 		{
+			//INC eSP
+			sprintf(strCompInstruction, "INC ESP");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x45:
 		{
+			//INC eBP
+			sprintf(strCompInstruction, "INC EBP");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x46:
 		{
+			//INC eSI
+			sprintf(strCompInstruction, "INC ESI");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x47:
 		{
+			//INC eDI
+			sprintf(strCompInstruction, "INC EDI");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	default:
@@ -3001,42 +12250,78 @@ int DecodeINC(BYTE byOpcode, BYTE* byarPrefix)
 
 }
 
-int DecodeDEC(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeDEC
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of DEC instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeDEC(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+
+	char strCompInstruction[1024] = {'\0'};
 
 	switch(byOpcode)
 	{
 	case 0x48:
 		{
+			//DEC eAX
+			sprintf(strCompInstruction, "DEC EAX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x49:
 		{
+			//DEC eCX
+			sprintf(strCompInstruction, "DEC ECX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x4A:
 		{
+			//DEC eDX
+			sprintf(strCompInstruction, "DEC EDX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x4B:
 		{
+			//DEC eBX
+			sprintf(strCompInstruction, "DEC EBX");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x4C:
 		{
+			//DEC eSP
+			sprintf(strCompInstruction, "DEC ESP");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x4D:
 		{
+			//DEC eBP
+			sprintf(strCompInstruction, "DEC EBP");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x4E:
 		{
+			//DEC eSI
+			sprintf(strCompInstruction, "DEC ESI");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x4F:
 		{
+			//DEC eDI
+			sprintf(strCompInstruction, "DEC EDI");
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	default:
@@ -3048,15 +12333,298 @@ int DecodeDEC(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-
-int DecodeBOUND(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeBOUND
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of BOUND instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeBOUND(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
+
+	char strCompInstruction[1024] = {'\0'};
+
+	SIB* pSIB = NULL;
+	ModRegRM* pModRegRM = NULL;
 
 	switch(byOpcode)
 	{
 	case 0x62:
 		{
+			//BOUND i64 Gv, Ma
+			pInst->bmodRMExists = true;
+			
+			nCurrentIndex++;
+			
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->LengthOfInstruction++;
+
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(pModRegRM != NULL)
+				{
+					sprintf(strCompInstruction, "BOUND %s, ", archREGFields_32[pModRegRM->reg]);
+
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+								
+								if(nCurrentIndex < nSize)
+								{
+									//GET SIB Byte
+									pInst->LengthOfInstruction++;
+
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+											
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sqword ptr [%x+%d*%s]",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sqword ptr [%x]",strCompInstruction, pInst->Displacement );
+											}
+
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sqword ptr [%d*%s+%s]", strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sqword ptr [%d*%s+%s]", strCompInstruction, pSIB->scale, archSIBIndex[pSIB->index], archSIBBase[pSIB->base]);
+											}
+
+										}
+
+										free(pSIB);
+										pSIB = NULL;
+
+									}
+									else
+									{
+										//SIB is null Error
+
+									}
+								}
+								else
+								{
+									//ERROR due to exceeding the byte array
+								}
+
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sqword ptr [%x]", strCompInstruction, pInst->Displacement);
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sqword ptr [%s]", strCompInstruction, archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+
+								if(nCurrentIndex < nSize)
+								{
+									pInst->LengthOfInstruction++;
+
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										//Get displacement 8 bits
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction+= 1;
+										nCurrentIndex+=1;
+
+										if(5 == pSIB->base)
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sqword ptr[EBP+%x+%d*%s]", strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sqword ptr[EBP+%x]", strCompInstruction, pInst->Displacement);
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sqword ptr[%s+%x+%d*%s]", strCompInstruction, archSIBBase[pSIB->base], pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sqword ptr[%s+%x]", strCompInstruction, archSIBBase[pSIB->base], pInst->Displacement);
+
+											}
+
+										}
+
+										free(pSIB);
+										pSIB = NULL;
+
+									}
+									else
+									{
+										//ERROR SIB byte is null
+									}
+								}
+								else
+								{
+									//Error exceeded byte array
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sqword ptr[%x+%s]", strCompInstruction, pInst->Displacement, archMODRMFields_32[pModRegRM->rm]);
+
+
+							}
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								nCurrentIndex++;
+
+								if(nCurrentIndex < nSize)
+								{
+									pInst->LengthOfInstruction++;
+
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									
+
+									if(NULL != pSIB)
+									{
+
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sqword ptr [EBP+%x+%d*%s]", strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sqword ptr [EBP+%x]", strCompInstruction, pInst->Displacement);
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sqword ptr [%s+%x+%d*%s]", strCompInstruction, archSIBBase[pSIB->base], pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sqword ptr [%s+%x]", strCompInstruction, archSIBBase[pSIB->base], pInst->Displacement);
+											}
+										}
+										free(pSIB);
+									}
+									else
+									{
+										//ERROR in allocating SIB byte
+									}
+								}
+								else
+								{
+									//ERROR exceeded byte array
+								}
+
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sqword ptr[%x+%s]", strCompInstruction, pInst->Displacement, archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%sqword ptr[%s]",strCompInstruction, archREGFields_32[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR
+							break;
+						}
+					}
+
+					free(pModRegRM);
+					pModRegRM = NULL;
+				}
+				else
+				{
+					//ERROR ModRegRM is NULL
+				}
+			}
+			else
+			{
+				//Error current index exceeded size of byte array
+			}
+
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	default:
@@ -3068,126 +12636,972 @@ int DecodeBOUND(BYTE byOpcode, BYTE* byarPrefix)
 	return nReturnValue;
 }
 
-int DecodeMOV(BYTE byOpcode, BYTE* byarPrefix)
+/*
+*Name: DecodeMOV
+*Description: This function decode all the opcodes which are pertaining to single byte OPCODE of MOV instruction.
+*Parameters: byOpcode - Actual opcode,
+			 byarRawCode - Byte array of raw instruction
+			 nCurrentIndex - Current index of the byOpcode in byarRawCode
+			 nSize - Total size of byarRawCode
+			 pInst - Instruction where decode instruction will be stored
+*Return: 0 For success else some error has occured.
+*/
+int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, Instruction* pInst)
 {
 	int nReturnValue = 0;
-	
+
+	char strCompInstruction[1024] = {'\0'};
+
+	SIB* pSIB = NULL;
+	ModRegRM* pModRegRM = NULL;
+
 	switch(byOpcode)
 	{
 	case 0x63:
 		{
+			//ARPL i64 Ew, Gw :: MOVSXD o64 Gv, Ev
+			sprintf(strCompInstruction, "ARPL ");
+			//Ew
+			//Get the ModRegRM byte
+			nCurrentIndex++;
+			if(nCurrentIndex < nSize)
+			{
+				pInst->LengthOfInstruction++;
+
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(6 == pModRegRM->rm)
+							{
+								//Get Displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 2, pInst);
+								pInst->LengthOfInstruction+= 2;
+								nCurrentIndex+=2;
+
+								sprintf(strCompInstruction, "%sWORD ptr [%s], ", strCompInstruction, pInst->Displacement);
+
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr [%s], ", strCompInstruction, archMODRMFields_16[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 1:
+						{
+							GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+							pInst->LengthOfInstruction+= 1;
+							nCurrentIndex+=1;
+
+							if(6 == pModRegRM->rm)
+							{
+								sprintf(strCompInstruction, "%sWORD ptr [BP+%x], ",pInst->Displacement);
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ", archMODRMFields_16[pModRegRM->rm], pInst->Displacement);
+							}
+							break;
+						}
+					case 2:
+						{
+							GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 2, pInst);
+							pInst->LengthOfInstruction+= 2;
+							nCurrentIndex+=2;
+
+							if(6 == pModRegRM->rm)
+							{
+								sprintf(strCompInstruction, "%sWORD ptr [BP+%x], ",pInst->Displacement);
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sWORD ptr [%s+%x], ", archMODRMFields_16[pModRegRM->rm], pInst->Displacement);
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_16[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR invalid mode
+							break;
+						}
+
+					}
+
+					free(pModRegRM);
+					pModRegRM = NULL;
+				}
+				else
+				{
+					//ERROR pModRegRM is NULL
+				}
+				
+			}
+			else
+			{
+				//Error current index exceeded Byte Array
+			}
+
+			//Gw
+			sprintf(strCompInstruction, "%s%s", strCompInstruction, archREGFields_16[pModRegRM->reg])
+			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
 	case 0x88:
 		{
+			//Mov Eb,Gb
+			sprintf(strCompInstruction, "MOV ");
+			//Get ModRegRM
+			nCurrentIndex++;
+			if(nCurrentIndex < nSize)
+			{
+				pInst->LengthOfInstruction++;
+
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+				
+				//Eb
+				if(NULL != pModRegRM)
+				{
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								//GET SIB byte
+								nCurrentIndex++;
+
+								if(nCurrentIndex < nSize)
+								{
+									pInst->LengthOfInstruction++;
+
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											//Get the displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x], ", strCompInstruction, pInst->Displacement);
+											}
+
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s+%d*%s], ",strCompInstruction, archSIBBase[pSIB->base], pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+										}
+										free(pSIB);
+										pSIB = NULL;
+									}
+									else
+									{
+										//ERROR SIB byte is NULL
+									}
+
+								}
+								else
+								{
+									//Error current index is exceeding the byte array
+								}
+							}
+							else if(5 == pModRegRM->reg)
+							{
+								//Get displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr [%x], ", strCompInstruction, pInst->Displacement);
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sbyte ptr [%s], ", strCompInstruciton, archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								//GET SIB byte
+								nCurrentIndex++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->LengthOfInstruction++;
+
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction+= 1;
+										nCurrentIndex+=1;
+
+										if(5 == pSIB->base)
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[EBP+%x+%d*%s], ",strCompInstruciton, pInst->Displacemnt, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[EBP+%x], ",strCompInstruciton, pInst->Displacemnt);
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%s+%d*%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base]);
+
+											}
+
+										}
+
+										free(pSIB);
+										pSIB = NULL;
+
+									}
+									else
+									{
+										//ERROR SIB byte is null
+									}
+									
+								}
+								else
+								{
+									//ERROR exceeding the byte array index
+								}
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								//Get displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sbyte ptr[EBP+%x], ", strCompInstruction, pInst->Displacement);
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%x+%s], ", strCompInstruction, pInst->Displacement, archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								//GET SIB byte
+								nCurrentIndex++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->LengthOfInstruction++;
+
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[EBP+%x+%d*%s], ",strCompInstruciton, pInst->Displacemnt, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[EBP+%x], ",strCompInstruciton, pInst->Displacemnt);
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%s+%d*%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base]);
+
+											}
+
+										}
+
+										free(pSIB);
+										pSIB = NULL;
+
+									}
+									else
+									{
+										//ERROR SIB byte is null
+									}
+									
+								}
+								else
+								{
+									//ERROR exceeding the byte array index
+								}
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								//GET displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[EBP+%x], ", strCompInstruction, pInst->Displacement);
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sbyte ptr[%x+%s], ", strCompInstruction, pInst->Displacement, archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_8[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR invalid mode
+							break;
+						}
+
+					}
+
+					sprintf(strCompInstruction, "%s%s", strCompInstruction, archRegFields_8[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+					pModRegRM = NULL;
+				}
+				else
+				{
+					//ERROR ModRegRM is NULL
+				}
+			}
+			else
+			{
+				//Error currentIndex is exceeding the byte array
+			}
+			
+
+
 			break;
 		}
 	case 0x89:
 		{
+			//Mov Ev,Gv
+			sprintf(strCompInstruction, "MOV ");
+			//Get ModRegRM
+			nCurrentIndex++;
+			if(nCurrentIndex < nSize)
+			{
+				pInst->LengthOfInstruction++;
+
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+				
+				//Eb
+				if(NULL != pModRegRM)
+				{
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								//GET SIB byte
+								nCurrentIndex++;
+
+								if(nCurrentIndex < nSize)
+								{
+									pInst->LengthOfInstruction++;
+
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											//Get the displacement
+											GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+											pInst->LengthOfInstruction+= 4;
+											nCurrentIndex+=4;
+
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sdword ptr[%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sdword ptr[%x], ", strCompInstruction, pInst->Displacement);
+											}
+
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sdword ptr[%s+%d*%s], ",strCompInstruction, archSIBBase[pSIB->base], pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sdword ptr[%s], ",strCompInstruction, archSIBBase[pSIB->base]);
+											}
+										}
+										free(pSIB);
+										pSIB = NULL;
+									}
+									else
+									{
+										//ERROR SIB byte is NULL
+									}
+
+								}
+								else
+								{
+									//Error current index is exceeding the byte array
+								}
+							}
+							else if(5 == pModRegRM->reg)
+							{
+								//Get displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sdword ptr [%x], ", strCompInstruction, pInst->Displacement);
+							}
+							else
+							{
+								sprintf(strCompInstruction, "%sdword ptr [%s], ", strCompInstruciton, archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								//GET SIB byte
+								nCurrentIndex++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->LengthOfInstruction++;
+
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+										pInst->LengthOfInstruction+= 1;
+										nCurrentIndex+=1;
+
+										if(5 == pSIB->base)
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sdword ptr[EBP+%x+%d*%s], ",strCompInstruciton, pInst->Displacemnt, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sdword ptr[EBP+%x], ",strCompInstruciton, pInst->Displacemnt);
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sdword ptr[%x+%s+%d*%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sdword ptr[%x+%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base]);
+
+											}
+
+										}
+
+										free(pSIB);
+										pSIB = NULL;
+
+									}
+									else
+									{
+										//ERROR SIB byte is null
+									}
+									
+								}
+								else
+								{
+									//ERROR exceeding the byte array index
+								}
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								//Get displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sdword ptr[EBP+%x], ", strCompInstruction, pInst->Displacement);
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 1, pInst);
+								pInst->LengthOfInstruction+= 1;
+								nCurrentIndex+=1;
+
+								sprintf(strCompInstruction, "%sdword ptr[%x+%s], ", strCompInstruction, pInst->Displacement, archMODRMFields_32[pModRegRM->rm]);
+							}
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								//GET SIB byte
+								nCurrentIndex++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->LengthOfInstruction++;
+
+									pInst->bSibExists = true;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+										pInst->LengthOfInstruction+= 4;
+										nCurrentIndex+=4;
+
+										if(5 == pSIB->base)
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sdword ptr[EBP+%x+%d*%s], ",strCompInstruciton, pInst->Displacemnt, pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sdword ptr[EBP+%x], ",strCompInstruciton, pInst->Displacemnt);
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+												sprintf(strCompInstruction, "%sdword ptr[%x+%s+%d*%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+											}
+											else
+											{
+												sprintf(strCompInstruction, "%sdword ptr[%x+%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base]);
+
+											}
+
+										}
+
+										free(pSIB);
+										pSIB = NULL;
+
+									}
+									else
+									{
+										//ERROR SIB byte is null
+									}
+									
+								}
+								else
+								{
+									//ERROR exceeding the byte array index
+								}
+							}
+							else if(5 == pModRegRM->rm)
+							{
+								//GET displacement
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sdword ptr[EBP+%x], ", strCompInstruction, pInst->Displacement);
+							}
+							else
+							{
+								GetDisplacementOfInstruction(byarRawCode, nCurrentIndex+1, 4, pInst);
+								pInst->LengthOfInstruction+= 4;
+								nCurrentIndex+=4;
+
+								sprintf(strCompInstruction, "%sdword ptr[%x+%s], ", strCompInstruction, pInst->Displacement, archMODRMFields_32[pModRegRM->rm]);
+
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_32[pModRegRM->rm]);
+							break;
+						}
+					default:
+						{
+							//ERROR invalid mode
+							break;
+						}
+
+					}
+
+					sprintf(strCompInstruction, "%s%s", strCompInstruction, archRegFields_32[pModRegRM->reg]);
+
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+					pModRegRM = NULL;
+				}
+				else
+				{
+					//ERROR ModRegRM is NULL
+				}
+			}
+			else
+			{
+				//Error currentIndex is exceeding the byte array
+			}
 			break;
 		}
 	case 0x8A:
 		{
+			//Mov Gb,Eb
+			sprintf(strCompInstruciton,"MOV ");
+			//Get ModRegRM
+			nCurrentIndex++;
+
+			if(nCurrentIndex < nSize)
+			{
+				pInst->LengthOfInstruction++;
+
+				pInst->modrmpart = byarRawCode[nCurrentIndex];
+				
+				pInst->bmodRMExists = true;
+				ParseModRegRMByte(pInst->modrmpart, pModRegRM);
+
+				if(NULL != pModRegRM)
+				{
+					//Gb
+					sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archRegFields_8[pModRegRM->reg]);
+
+					//Eb
+					switch(pModRegRM->mode)
+					{
+					case 0:
+						{
+							if(4 == pModRegRM->rm)
+							{
+								//Get SIB byte
+								nCurrentIndex++;
+								if(nCurrentIndex < nSize)
+								{
+									pInst->LengthOfInstruction++;
+									pInst->sibpart = byarRawCode[nCurrentIndex];
+									pInst->bSibExists = true;
+
+									ParseSIBByte(pInst->sibpart, pSIB);
+
+									if(NULL != pSIB)
+									{
+										if(5 == pSIB->base)
+										{
+											if(4 != pSIB->index)
+											{
+
+											}
+											else
+											{
+
+											}
+										}
+										else
+										{
+											if(4 != pSIB->index)
+											{
+
+											}
+											else
+											{
+
+											}
+										}
+
+										free(pSIB);
+										pSIB = NULL;
+									}
+									else
+									{
+										//Error SIB byte is NULL
+									}
+
+									
+								}
+								else
+								{
+									//Error Exceeded byte array
+								}
+							}
+							else if(5 == pModRegRM->rm)
+							{
+
+							}
+							else
+							{
+
+							}
+							break;
+						}
+					case 1:
+						{
+							if(4 == pModRegRM->rm)
+							{
+							}
+							else if(5 == pModRegRM->rm)
+							{
+							}
+							else
+							{
+							}
+							break;
+						}
+					case 2:
+						{
+							if(4 == pModRegRM->rm)
+							{
+							}
+							else if(5 == pModRegRM->rm)
+							{
+							}
+							else
+							{
+							}
+							break;
+						}
+					case 3:
+						{
+							sprintf(strCompInstruction, "%s%s", strCompInstruction, archRegFields_8[pModRegRM->reg]);
+							break;
+						}
+					default:
+						{
+							//Error Invalid mode
+						}
+					}
+					
+					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
+
+					free(pModRegRM);
+					pModRegRM = NULL;
+				}
+				else
+				{
+					//ERROR ModRegRM byte is null
+				}
+			}
+			else
+			{
+				//ERROR currentindex exceeding the size of byte array
+			}
 			break;
 		}
 	case 0x8B:
 		{
+			//Mov Gv,Ev
 			break;
 		}
 	case 0x8C:
 		{
+			//Mov Ev,Sw
 			break;
 		}
 	case 0x8E:
 		{
+			//MOV Sw,Ew
 			break;
 		}
 	case 0xA0:
 		{
+			//MOV AL,Ob
 			break;
 		}
 	case 0xA1:
 		{
+			//MOV rAX, Ov
 			break;
 		}
 	case 0xA2:
 		{
+			//MOV Ob, AL
 			break;
 		}
 	case 0xA3:
 		{
+			//MOV Ov, rAX
 			break;
 		}
 	case 0xA4:
 		{
+			//MOVS/B Yb,Xb
 			break;
 		}
 	case 0xA5:
 		{
+			//MOVS/W/D/Q Yv,Xv
 			break;
 		}
 	case 0xB0:
 		{
+			//MOV immediate byte into byte register AL/R8L, Ib
 			break;
 		}
 	case 0xB1:
 		{
+			//MOV immediate byte into byte register CL/R9L, Ib
 			break;
 		}
 	case 0xB2:
 		{
+			//MOV immediate byte into byte register DL/R10L, Ib
 			break;
 		}
 	case 0xB3:
 		{
+			//MOV immediate byte into byte register BL/R11L, Ib
 			break;
 		}
 	case 0xB4:
 		{
+			//MOV immediate byte into byte register AH/R12L, Ib
 			break;
 		}
 	case 0xB5:
 		{
+			//MOV immediate byte into byte register CH/R13L, Ib
 			break;
 		}
 	case 0xB6:
 		{
+			//MOV immediate byte into byte register DH/R14L, Ib
 			break;
 		}
 	case 0xB7:
 		{
+			//MOV immediate byte into byte register BH/R15L, Ib
 			break;
 		}
 	case 0xB8:
 		{
+			//MOV immediate word or double into word, double, or quad register rAX/r8, Iv
 			break;
 		}
 	case 0xB9:
 		{
+			//MOV immediate word or double into word, double, or quad register rCX/r9, Iv
 			break;
 		}
 	case 0xBA:
 		{
+			//MOV immediate word or double into word, double, or quad register rDX/r10, Iv
 			break;
 		}
 	case 0xBB:
 		{
+			//MOV immediate word or double into word, double, or quad register rBX/r11, Iv
 			break;
 		}
 	case 0xBC:
 		{
+			//MOV immediate word or double into word, double, or quad register rSP/r12, Iv
 			break;
 		}
 	case 0xBD:
 		{
+			//MOV immediate word or double into word, double, or quad register rBP/r13, Iv
 			break;
 		}
 	case 0xBE:
 		{
+			//MOV immediate word or double into word, double, or quad register rSI/r14, Iv
 			break;
 		}
 	case 0xBF:
 		{
+			//MOV immediate word or double into word, double, or quad register rDI/r15, Iv
 			break;
 		}
 	default:

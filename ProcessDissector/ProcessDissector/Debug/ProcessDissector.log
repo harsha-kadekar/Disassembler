@@ -1,9 +1,5 @@
-﻿Build started 18-Apr-15 12:31:02 PM.
-     1>Project "E:\Coding\Projects\Disassembler\ProcessDissector\ProcessDissector\ProcessDissector.vcxproj" on node 2 (clean target(s)).
-     1>_PrepareForClean:
-         Deleting file "Debug\ProcessDissector.lastbuildstate".
-     1>Done Building Project "E:\Coding\Projects\Disassembler\ProcessDissector\ProcessDissector\ProcessDissector.vcxproj" (clean target(s)).
+﻿Build started 05-Jun-15 7:14:13 PM.
 
 Build succeeded.
 
-Time Elapsed 00:00:00.07
+Time Elapsed 00:00:03.59
