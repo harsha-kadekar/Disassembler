@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <stdio.h>
 
-typedef int (*Parseptr) (char*);
+typedef int (*FunctionPTR) (char*);
+
 
 #endif

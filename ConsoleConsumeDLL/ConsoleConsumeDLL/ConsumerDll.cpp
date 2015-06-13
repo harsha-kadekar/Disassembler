@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 {
 	int nReturnValue = 0;
 	HMODULE hDll = NULL;
-	Parseptr ParsePEFile = NULL;
+	FunctionPTR ParsePEFile = NULL, ListFiles = NULL;
 	char* strFileName = NULL;
 
 	if(argc != 2)
@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 		return -2;
 	}
 
-	ParsePEFile = (Parseptr)GetProcAddress(hDll, "ParsePEFile");
+	/*ParsePEFile = (FunctionPTR)GetProcAddress(hDll, "ParsePEFile");
 	if(NULL == ParsePEFile)
 	{
 		printf("Failed to get the function ParsePEFile\n");
@@ -44,8 +44,17 @@ int main(int argc, char** argv)
 	
 	
 	strFileName = argv[1];
-	nReturnValue = ParsePEFile(strFileName);
+	nReturnValue = ParsePEFile(strFileName);*/
 
+	ListFiles = (FunctionPTR)GetProcAddress(hDll, "ListFiles");
+	if(NULL == ListFiles)
+	{
+		printf("Failed to get the function ListFiles");
+		FreeLibrary(hDll);
+		return -3;
+	}
+	
+	nReturnValue = ListFiles("ALL");
 	
 
 	FreeLibrary(hDll);

@@ -85,10 +85,12 @@
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="PEParserHelper.cpp" />
+    <ClCompile Include="SystemStatistics.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DllMain.h" />
     <ClInclude Include="PEParserHelper.h" />
+    <ClInclude Include="SystemStatistics.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

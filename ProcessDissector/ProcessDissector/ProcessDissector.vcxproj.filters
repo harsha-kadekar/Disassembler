@@ -21,12 +21,18 @@
     <ClCompile Include="PEParserHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SystemStatistics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DllMain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PEParserHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemStatistics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

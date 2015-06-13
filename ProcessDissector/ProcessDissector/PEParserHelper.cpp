@@ -8558,7 +8558,7 @@ int DecodeDAA(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, In
 {
 	int nReturnValue = 0;
 
-	char* strCompInstruction[1024] = {'\0'};
+	char strCompInstruction[1024] = {'\0'};
 
 	switch(byOpcode)
 	{
@@ -12755,7 +12755,7 @@ int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, In
 			}
 
 			//Gw
-			sprintf(strCompInstruction, "%s%s", strCompInstruction, archREGFields_16[pModRegRM->reg])
+			sprintf(strCompInstruction, "%s%s", strCompInstruction, archREGFields_16[pModRegRM->reg]);
 			pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 			break;
 		}
@@ -12850,7 +12850,7 @@ int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, In
 							}
 							else
 							{
-								sprintf(strCompInstruction, "%sbyte ptr [%s], ", strCompInstruciton, archMODRMFields_32[pModRegRM->rm]);
+								sprintf(strCompInstruction, "%sbyte ptr [%s], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm]);
 
 							}
 							break;
@@ -12880,22 +12880,22 @@ int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, In
 										{
 											if(4 != pSIB->index)
 											{
-												sprintf(strCompInstruction, "%sbyte ptr[EBP+%x+%d*%s], ",strCompInstruciton, pInst->Displacemnt, pSIB->scale, archSIBIndex[pSIB->index]);
+												sprintf(strCompInstruction, "%sbyte ptr[EBP+%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
 											}
 											else
 											{
-												sprintf(strCompInstruction, "%sbyte ptr[EBP+%x], ",strCompInstruciton, pInst->Displacemnt);
+												sprintf(strCompInstruction, "%sbyte ptr[EBP+%x], ",strCompInstruction, pInst->Displacement);
 											}
 										}
 										else
 										{
 											if(4 != pSIB->index)
 											{
-												sprintf(strCompInstruction, "%sbyte ptr[%x+%s+%d*%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%s+%d*%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
 											}
 											else
 											{
-												sprintf(strCompInstruction, "%sbyte ptr[%x+%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base]);
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
 
 											}
 
@@ -12960,22 +12960,22 @@ int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, In
 										{
 											if(4 != pSIB->index)
 											{
-												sprintf(strCompInstruction, "%sbyte ptr[EBP+%x+%d*%s], ",strCompInstruciton, pInst->Displacemnt, pSIB->scale, archSIBIndex[pSIB->index]);
+												sprintf(strCompInstruction, "%sbyte ptr[EBP+%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
 											}
 											else
 											{
-												sprintf(strCompInstruction, "%sbyte ptr[EBP+%x], ",strCompInstruciton, pInst->Displacemnt);
+												sprintf(strCompInstruction, "%sbyte ptr[EBP+%x], ",strCompInstruction, pInst->Displacement);
 											}
 										}
 										else
 										{
 											if(4 != pSIB->index)
 											{
-												sprintf(strCompInstruction, "%sbyte ptr[%x+%s+%d*%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%s+%d*%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
 											}
 											else
 											{
-												sprintf(strCompInstruction, "%sbyte ptr[%x+%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base]);
+												sprintf(strCompInstruction, "%sbyte ptr[%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
 
 											}
 
@@ -13029,7 +13029,7 @@ int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, In
 
 					}
 
-					sprintf(strCompInstruction, "%s%s", strCompInstruction, archRegFields_8[pModRegRM->reg]);
+					sprintf(strCompInstruction, "%s%s", strCompInstruction, archREGFields_8[pModRegRM->reg]);
 
 					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 
@@ -13141,7 +13141,7 @@ int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, In
 							}
 							else
 							{
-								sprintf(strCompInstruction, "%sdword ptr [%s], ", strCompInstruciton, archMODRMFields_32[pModRegRM->rm]);
+								sprintf(strCompInstruction, "%sdword ptr [%s], ", strCompInstruction, archMODRMFields_32[pModRegRM->rm]);
 
 							}
 							break;
@@ -13171,22 +13171,22 @@ int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, In
 										{
 											if(4 != pSIB->index)
 											{
-												sprintf(strCompInstruction, "%sdword ptr[EBP+%x+%d*%s], ",strCompInstruciton, pInst->Displacemnt, pSIB->scale, archSIBIndex[pSIB->index]);
+												sprintf(strCompInstruction, "%sdword ptr[EBP+%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
 											}
 											else
 											{
-												sprintf(strCompInstruction, "%sdword ptr[EBP+%x], ",strCompInstruciton, pInst->Displacemnt);
+												sprintf(strCompInstruction, "%sdword ptr[EBP+%x], ",strCompInstruction, pInst->Displacement);
 											}
 										}
 										else
 										{
 											if(4 != pSIB->index)
 											{
-												sprintf(strCompInstruction, "%sdword ptr[%x+%s+%d*%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+												sprintf(strCompInstruction, "%sdword ptr[%x+%s+%d*%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
 											}
 											else
 											{
-												sprintf(strCompInstruction, "%sdword ptr[%x+%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base]);
+												sprintf(strCompInstruction, "%sdword ptr[%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
 
 											}
 
@@ -13251,22 +13251,22 @@ int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, In
 										{
 											if(4 != pSIB->index)
 											{
-												sprintf(strCompInstruction, "%sdword ptr[EBP+%x+%d*%s], ",strCompInstruciton, pInst->Displacemnt, pSIB->scale, archSIBIndex[pSIB->index]);
+												sprintf(strCompInstruction, "%sdword ptr[EBP+%x+%d*%s], ",strCompInstruction, pInst->Displacement, pSIB->scale, archSIBIndex[pSIB->index]);
 											}
 											else
 											{
-												sprintf(strCompInstruction, "%sdword ptr[EBP+%x], ",strCompInstruciton, pInst->Displacemnt);
+												sprintf(strCompInstruction, "%sdword ptr[EBP+%x], ",strCompInstruction, pInst->Displacement);
 											}
 										}
 										else
 										{
 											if(4 != pSIB->index)
 											{
-												sprintf(strCompInstruction, "%sdword ptr[%x+%s+%d*%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
+												sprintf(strCompInstruction, "%sdword ptr[%x+%s+%d*%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base],pSIB->scale, archSIBIndex[pSIB->index]);
 											}
 											else
 											{
-												sprintf(strCompInstruction, "%sdword ptr[%x+%s], ",strCompInstruciton, pInst->Displacemnt, archSIBBase[pSIB->base]);
+												sprintf(strCompInstruction, "%sdword ptr[%x+%s], ",strCompInstruction, pInst->Displacement, archSIBBase[pSIB->base]);
 
 											}
 
@@ -13320,7 +13320,7 @@ int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, In
 
 					}
 
-					sprintf(strCompInstruction, "%s%s", strCompInstruction, archRegFields_32[pModRegRM->reg]);
+					sprintf(strCompInstruction, "%s%s", strCompInstruction, archREGFields_32[pModRegRM->reg]);
 
 					pInst->actualInstruction = GetActualInstruction(strCompInstruction);
 
@@ -13341,7 +13341,7 @@ int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, In
 	case 0x8A:
 		{
 			//Mov Gb,Eb
-			sprintf(strCompInstruciton,"MOV ");
+			sprintf(strCompInstruction,"MOV ");
 			//Get ModRegRM
 			nCurrentIndex++;
 
@@ -13357,7 +13357,7 @@ int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, In
 				if(NULL != pModRegRM)
 				{
 					//Gb
-					sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archRegFields_8[pModRegRM->reg]);
+					sprintf(strCompInstruction, "%s%s, ", strCompInstruction, archREGFields_8[pModRegRM->reg]);
 
 					//Eb
 					switch(pModRegRM->mode)
@@ -13454,7 +13454,7 @@ int DecodeMOV(BYTE byOpcode, BYTE* byarRawCode, int nCurrentIndex, int nSize, In
 						}
 					case 3:
 						{
-							sprintf(strCompInstruction, "%s%s", strCompInstruction, archRegFields_8[pModRegRM->reg]);
+							sprintf(strCompInstruction, "%s%s", strCompInstruction, archREGFields_8[pModRegRM->reg]);
 							break;
 						}
 					default:
