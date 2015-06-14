@@ -13,11 +13,11 @@ int main(int argc, char** argv)
 	FunctionPTR ParsePEFile = NULL, ListFiles = NULL;
 	char* strFileName = NULL;
 
-	if(argc != 2)
+	/*if(argc != 2)
 	{
 		printf("Invalid number of arguments....");
 		return -1;
-	}
+	}*/
 
 
 
@@ -28,6 +28,8 @@ int main(int argc, char** argv)
 		printf("Failed to load library ProcessDissector\n");
 		return -2;
 	}
+
+	
 
 	/*ParsePEFile = (FunctionPTR)GetProcAddress(hDll, "ParsePEFile");
 	if(NULL == ParsePEFile)
@@ -53,6 +55,10 @@ int main(int argc, char** argv)
 		FreeLibrary(hDll);
 		return -3;
 	}
+
+	printf("Waiting to be linked......\n");
+	Sleep(60000);
+	printf("Finished wait.");
 	
 	nReturnValue = ListFiles("ALL");
 	

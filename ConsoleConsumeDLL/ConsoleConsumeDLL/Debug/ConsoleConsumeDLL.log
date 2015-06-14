@@ -1,4 +1,4 @@
-﻿Build started 13-Jun-15 4:22:12 PM.
+﻿Build started 14-Jun-15 1:05:51 AM.
      1>Project "E:\Coding\Projects\Disassembler\ConsoleConsumeDLL\ConsoleConsumeDLL\ConsoleConsumeDLL.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\ConsoleConsumeDLL.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -6,16 +6,15 @@
          C:\Program Files\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ConsumerDll.cpp
          ConsumerDll.cpp
        ManifestResourceCompile:
-         C:\Program Files\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\ConsoleConsumeDLL.exe.embed.manifest.res" Debug\ConsoleConsumeDLL_manifest.rc 
+         All outputs are up-to-date.
        Link:
          C:\Program Files\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\Coding\Projects\Disassembler\ConsoleConsumeDLL\Debug\ConsoleConsumeDLL.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\ConsoleConsumeDLL.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"E:\Coding\Projects\Disassembler\ConsoleConsumeDLL\Debug\ConsoleConsumeDLL.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\Coding\Projects\Disassembler\ConsoleConsumeDLL\Debug\ConsoleConsumeDLL.lib" /MACHINE:X86 Debug\ConsoleConsumeDLL.exe.embed.manifest.res
          Debug\ConsumerDll.obj
        Manifest:
          C:\Program Files\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"Debug\ConsoleConsumeDLL.exe.embed.manifest" /manifest Debug\ConsoleConsumeDLL.exe.intermediate.manifest
-         C:\Program Files\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\ConsoleConsumeDLL.exe.embed.manifest.res" Debug\ConsoleConsumeDLL_manifest.rc 
+         All outputs are up-to-date.
        LinkEmbedManifest:
-         C:\Program Files\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\Coding\Projects\Disassembler\ConsoleConsumeDLL\Debug\ConsoleConsumeDLL.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\ConsoleConsumeDLL.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"E:\Coding\Projects\Disassembler\ConsoleConsumeDLL\Debug\ConsoleConsumeDLL.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\Coding\Projects\Disassembler\ConsoleConsumeDLL\Debug\ConsoleConsumeDLL.lib" /MACHINE:X86 Debug\ConsoleConsumeDLL.exe.embed.manifest.res
-         Debug\ConsumerDll.obj
+         All outputs are up-to-date.
          ConsoleConsumeDLL.vcxproj -> E:\Coding\Projects\Disassembler\ConsoleConsumeDLL\Debug\ConsoleConsumeDLL.exe
        FinalizeBuildStatus:
          Deleting file "Debug\ConsoleConsumeDLL.unsuccessfulbuild".
@@ -24,4 +23,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:04.26
+Time Elapsed 00:00:02.49

@@ -15,6 +15,13 @@ typedef struct structFileFolder
 	__int64 Size;
 	WCHAR* strAbsolutePath;
 	WCHAR* strParent;
+	bool isFolder;
+	bool isReadonly;
+	bool isHidden;
+	bool isSystem;
 }FileFolderInfo;
+
+int ListFilesinPath(WCHAR* strPath);
+int ListFilesOfDirectory(FileFolderInfo* folderInfo);
 
 #endif
