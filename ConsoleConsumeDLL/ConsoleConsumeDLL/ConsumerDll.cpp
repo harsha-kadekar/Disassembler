@@ -56,11 +56,19 @@ int main(int argc, char** argv)
 		return -3;
 	}
 
-	printf("Waiting to be linked......\n");
-	Sleep(60000);
-	printf("Finished wait.");
+	/*printf("Waiting to be linked......\n");
+	Sleep(30000);
+	printf("Finished wait.\n");*/
 	
-	nReturnValue = ListFiles("ALL");
+	//nReturnValue = ListFiles("ALL");
+
+	nReturnValue = ListFiles("E:\\Coding\\");
+
+	//nReturnValue = ListFiles("E:\\My Interests\\");
+
+	//nReturnValue = ListFiles("E:\\My Interests");
+
+	//nReturnValue = ListFiles("E:\\My Interests\\Sanatana Dharma\\10120488-Hindu-TemplesWhat-Happend-to-Them-by-Sita-Ram-Goel.pdf");
 	
 
 	FreeLibrary(hDll);
