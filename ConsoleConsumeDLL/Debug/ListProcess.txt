@@ -1,0 +1,1781 @@
+
+===================================================================================
+TOTAL PHYSICAL MEMORY USAGE: 63
+PHYSICAL MEMORY: 3210371072 bytes
+AVAILABLE PHYSICAL MEMORY: 1176592384 bytes
+TOTAL VIRTUAl MEMORY (SWAP FILE + RAM): 2123988992 bytes
+MAXIMUM AMOUNT OF MEMORY PROCESS CAN COMMIT: 2149937152 bytes
+TOTAL VIRTUAL MEMORY CURRENTLY USED: 4269019136 bytes
+USER-MODE PORTION OF VIRTUAL ADDRESS SPACE: 2147352576 bytes
+UNRESERVED AND UNCOMMITTED MEMORY IN USER MODE: 2119483392 bytes
+
+===================================================================================
+
+======================================================================================
+TOTAL PAGES COMMITTED BY SYSTEM: 1042241
+MAX NUMBER OF PAGES CAN BE COMMITTED: 1567128
+MAX NUMBER OF PAGES IN COMMIT STATE: 1499890
+AMOUNT OF ACTUAL PHYSICAL MEMORY IN PAGES: 783782
+AMOUNT OF AVAILABLE PHYSICAL MEMORY IN PAGES: 287241
+SYSTEM CACHE IN PAGES: 280899
+MEMORY IN PAGED AND NONPAGED KERNEL POOLS IN PAGES: 86916
+MEMORY IN PAGED KERNEL POOL IN PAGES: 70572
+MEMORY IN NON PAGED KERNEL POOL IN PAGES: 16344
+SIZE OF PAGE: 4096 bytes
+HANDLE COUNT: 45464
+PROCESS COUNT: 114
+THREAD COUNT: 1518
+
+======================================================================================
+
+List Of Processes and its details
+
+
+===============================================================
+PROCESS NAME: [System Process]
+PROCESS ID: 0
+THREAD COUNT: 2
+PARENT PROCESS ID: 0
+PRIORITY BASE: 0
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 87
+NOT ABLE TO ACCESS SESSION ID OF PROCESS
+
+===============================================================
+
+===============================================================
+PROCESS NAME: System
+PROCESS ID: 4
+THREAD COUNT: 157
+PARENT PROCESS ID: 0
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: smss.exe
+PROCESS ID: 432
+THREAD COUNT: 2
+PARENT PROCESS ID: 4
+PRIORITY BASE: 11
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: csrss.exe
+PROCESS ID: 548
+THREAD COUNT: 9
+PARENT PROCESS ID: 520
+PRIORITY BASE: 13
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+NOT ABLE TO ACCESS SESSION ID OF PROCESS
+
+===============================================================
+
+===============================================================
+PROCESS NAME: wininit.exe
+PROCESS ID: 628
+THREAD COUNT: 5
+PARENT PROCESS ID: 520
+PRIORITY BASE: 13
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: csrss.exe
+PROCESS ID: 648
+THREAD COUNT: 12
+PARENT PROCESS ID: 620
+PRIORITY BASE: 13
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+NOT ABLE TO ACCESS SESSION ID OF PROCESS
+
+===============================================================
+
+===============================================================
+PROCESS NAME: services.exe
+PROCESS ID: 692
+THREAD COUNT: 7
+PARENT PROCESS ID: 628
+PRIORITY BASE: 9
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: lsass.exe
+PROCESS ID: 708
+THREAD COUNT: 9
+PARENT PROCESS ID: 628
+PRIORITY BASE: 9
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: lsm.exe
+PROCESS ID: 716
+THREAD COUNT: 12
+PARENT PROCESS ID: 628
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: winlogon.exe
+PROCESS ID: 800
+THREAD COUNT: 5
+PARENT PROCESS ID: 620
+PRIORITY BASE: 13
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 880
+THREAD COUNT: 11
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: nvvsvc.exe
+PROCESS ID: 944
+THREAD COUNT: 5
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 988
+THREAD COUNT: 10
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 1160
+THREAD COUNT: 25
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 1196
+THREAD COUNT: 30
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 1224
+THREAD COUNT: 21
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 1260
+THREAD COUNT: 46
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: UMVPFSrv.exe
+PROCESS ID: 1284
+THREAD COUNT: 4
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: NvXDSync.exe
+PROCESS ID: 1572
+THREAD COUNT: 7
+PARENT PROCESS ID: 944
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: nvvsvc.exe
+PROCESS ID: 1588
+THREAD COUNT: 6
+PARENT PROCESS ID: 944
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 1640
+THREAD COUNT: 33
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: spoolsv.exe
+PROCESS ID: 1796
+THREAD COUNT: 12
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 1828
+THREAD COUNT: 17
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: armsvc.exe
+PROCESS ID: 2008
+THREAD COUNT: 4
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: AppleMobileDeviceService.exe
+PROCESS ID: 2032
+THREAD COUNT: 10
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: taskhost.exe
+PROCESS ID: 520
+THREAD COUNT: 11
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 19958
+WORKING SET SIZE: 9293824 bytes
+PAGE FILE USAGE: 11231232 bytes
+PEAK PAGE FILE USAGE: 11354112 bytes
+PEAK WORKING SET SIZE: 9723904 bytes
+QUOTA NON PAGED POOL USAGE: 15332 bytes
+QUOTA PAGED POOL USAGE: 154116 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 20552 bytes
+QUOTA PEAK PAGED USAGE: 163956 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: dwm.exe
+PROCESS ID: 1536
+THREAD COUNT: 5
+PARENT PROCESS ID: 1196
+PRIORITY BASE: 13
+PAGE FAULT COUNT: 313651
+WORKING SET SIZE: 40423424 bytes
+PAGE FILE USAGE: 28360704 bytes
+PEAK PAGE FILE USAGE: 46821376 bytes
+PEAK WORKING SET SIZE: 60801024 bytes
+QUOTA NON PAGED POOL USAGE: 12460 bytes
+QUOTA PAGED POOL USAGE: 369108 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 17620 bytes
+QUOTA PEAK PAGED USAGE: 453972 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: explorer.exe
+PROCESS ID: 2080
+THREAD COUNT: 48
+PARENT PROCESS ID: 1488
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 421258
+WORKING SET SIZE: 66822144 bytes
+PAGE FILE USAGE: 103239680 bytes
+PEAK PAGE FILE USAGE: 108838912 bytes
+PEAK WORKING SET SIZE: 80433152 bytes
+QUOTA NON PAGED POOL USAGE: 52240 bytes
+QUOTA PAGED POOL USAGE: 585932 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 54260 bytes
+QUOTA PEAK PAGED USAGE: 750532 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: ApplicationUpdater.exe
+PROCESS ID: 2152
+THREAD COUNT: 4
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: avp.exe
+PROCESS ID: 2188
+THREAD COUNT: 129
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: mDNSResponder.exe
+PROCESS ID: 2312
+THREAD COUNT: 4
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: CLMSMonitorService.exe
+PROCESS ID: 2364
+THREAD COUNT: 3
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: CLMSServer.exe
+PROCESS ID: 2408
+THREAD COUNT: 9
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: MemeoBackgroundService.exe
+PROCESS ID: 2536
+THREAD COUNT: 8
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: sqlservr.exe
+PROCESS ID: 2660
+THREAD COUNT: 32
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: sqlservr.exe
+PROCESS ID: 2764
+THREAD COUNT: 38
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: rndlresolversvc.exe
+PROCESS ID: 2940
+THREAD COUNT: 4
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: SeagateDashboardService.exe
+PROCESS ID: 2964
+THREAD COUNT: 13
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: sqlwriter.exe
+PROCESS ID: 2996
+THREAD COUNT: 4
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: stacsv.exe
+PROCESS ID: 3032
+THREAD COUNT: 9
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 3072
+THREAD COUNT: 9
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: TeamViewer_Service.exe
+PROCESS ID: 3176
+THREAD COUNT: 20
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: TuneUpUtilitiesService32.exe
+PROCESS ID: 3260
+THREAD COUNT: 16
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: MonServiceUDisk.exe
+PROCESS ID: 3304
+THREAD COUNT: 4
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: WDDriveService.exe
+PROCESS ID: 3352
+THREAD COUNT: 20
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: WBDesktop.Updater.1.0.0.16.exe
+PROCESS ID: 3372
+THREAD COUNT: 8
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: WifiSvc.exe
+PROCESS ID: 3672
+THREAD COUNT: 8
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 4032
+THREAD COUNT: 29
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 2512
+THREAD COUNT: 5
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: TuneUpUtilitiesApp32.exe
+PROCESS ID: 744
+THREAD COUNT: 7
+PARENT PROCESS ID: 3260
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 24554
+WORKING SET SIZE: 4816896 bytes
+PAGE FILE USAGE: 2093056 bytes
+PEAK PAGE FILE USAGE: 2121728 bytes
+PEAK WORKING SET SIZE: 8781824 bytes
+QUOTA NON PAGED POOL USAGE: 5144 bytes
+QUOTA PAGED POOL USAGE: 138988 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 5964 bytes
+QUOTA PEAK PAGED USAGE: 159380 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: SearchIndexer.exe
+PROCESS ID: 2648
+THREAD COUNT: 13
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: PWRISOVM.EXE
+PROCESS ID: 4380
+THREAD COUNT: 1
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 997
+WORKING SET SIZE: 1650688 bytes
+PAGE FILE USAGE: 892928 bytes
+PEAK PAGE FILE USAGE: 909312 bytes
+PEAK WORKING SET SIZE: 3534848 bytes
+QUOTA NON PAGED POOL USAGE: 2820 bytes
+QUOTA PAGED POOL USAGE: 90044 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 3460 bytes
+QUOTA PEAK PAGED USAGE: 91556 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: avpui.exe
+PROCESS ID: 4484
+THREAD COUNT: 18
+PARENT PROCESS ID: 2188
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: LWS.exe
+PROCESS ID: 4616
+THREAD COUNT: 1
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 3192
+WORKING SET SIZE: 1118208 bytes
+PAGE FILE USAGE: 4546560 bytes
+PEAK PAGE FILE USAGE: 4599808 bytes
+PEAK WORKING SET SIZE: 11763712 bytes
+QUOTA NON PAGED POOL USAGE: 4500 bytes
+QUOTA PAGED POOL USAGE: 120492 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 5080 bytes
+QUOTA PEAK PAGED USAGE: 130204 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: ipoint.exe
+PROCESS ID: 4668
+THREAD COUNT: 9
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 6649
+WORKING SET SIZE: 5414912 bytes
+PAGE FILE USAGE: 4812800 bytes
+PEAK PAGE FILE USAGE: 36597760 bytes
+PEAK WORKING SET SIZE: 12410880 bytes
+QUOTA NON PAGED POOL USAGE: 8192 bytes
+QUOTA PAGED POOL USAGE: 153836 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 8620 bytes
+QUOTA PEAK PAGED USAGE: 208444 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: sttray.exe
+PROCESS ID: 4724
+THREAD COUNT: 5
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 2896
+WORKING SET SIZE: 1974272 bytes
+PAGE FILE USAGE: 3588096 bytes
+PEAK PAGE FILE USAGE: 4612096 bytes
+PEAK WORKING SET SIZE: 9236480 bytes
+QUOTA NON PAGED POOL USAGE: 5048 bytes
+QUOTA PAGED POOL USAGE: 132924 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 6304 bytes
+QUOTA PEAK PAGED USAGE: 146588 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: WDDriveAutoUnlock.exe
+PROCESS ID: 4788
+THREAD COUNT: 5
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 3912
+WORKING SET SIZE: 3301376 bytes
+PAGE FILE USAGE: 1937408 bytes
+PEAK PAGE FILE USAGE: 1953792 bytes
+PEAK WORKING SET SIZE: 6500352 bytes
+QUOTA NON PAGED POOL USAGE: 5000 bytes
+QUOTA PAGED POOL USAGE: 124156 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 5880 bytes
+QUOTA PEAK PAGED USAGE: 141116 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: IBurn.exe
+PROCESS ID: 4808
+THREAD COUNT: 1
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 19653
+WORKING SET SIZE: 4038656 bytes
+PAGE FILE USAGE: 1814528 bytes
+PEAK PAGE FILE USAGE: 5742592 bytes
+PEAK WORKING SET SIZE: 8581120 bytes
+QUOTA NON PAGED POOL USAGE: 4680 bytes
+QUOTA PAGED POOL USAGE: 197524 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 5660 bytes
+QUOTA PEAK PAGED USAGE: 202220 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: CLMLSvc_P2G8.exe
+PROCESS ID: 4876
+THREAD COUNT: 6
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 1945
+WORKING SET SIZE: 1753088 bytes
+PAGE FILE USAGE: 2457600 bytes
+PEAK PAGE FILE USAGE: 2498560 bytes
+PEAK WORKING SET SIZE: 6828032 bytes
+QUOTA NON PAGED POOL USAGE: 4660 bytes
+QUOTA PAGED POOL USAGE: 147668 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 5540 bytes
+QUOTA PEAK PAGED USAGE: 148708 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: InstantBackup.exe
+PROCESS ID: 5064
+THREAD COUNT: 25
+PARENT PROCESS ID: 4432
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 200999
+WORKING SET SIZE: 28483584 bytes
+PAGE FILE USAGE: 59285504 bytes
+PEAK PAGE FILE USAGE: 64258048 bytes
+PEAK WORKING SET SIZE: 54816768 bytes
+QUOTA NON PAGED POOL USAGE: 47984 bytes
+QUOTA PAGED POOL USAGE: 356764 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 53404 bytes
+QUOTA PEAK PAGED USAGE: 553372 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: PDVD10Serv.exe
+PROCESS ID: 5120
+THREAD COUNT: 11
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 2125
+WORKING SET SIZE: 2244608 bytes
+PAGE FILE USAGE: 2539520 bytes
+PEAK PAGE FILE USAGE: 2613248 bytes
+PEAK WORKING SET SIZE: 7409664 bytes
+QUOTA NON PAGED POOL USAGE: 47204 bytes
+QUOTA PAGED POOL USAGE: 104388 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 47744 bytes
+QUOTA PEAK PAGED USAGE: 104876 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 5524
+THREAD COUNT: 10
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: brs.exe
+PROCESS ID: 5580
+THREAD COUNT: 1
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 811
+WORKING SET SIZE: 1499136 bytes
+PAGE FILE USAGE: 778240 bytes
+PEAK PAGE FILE USAGE: 778240 bytes
+PEAK WORKING SET SIZE: 3022848 bytes
+QUOTA NON PAGED POOL USAGE: 2700 bytes
+QUOTA PAGED POOL USAGE: 82900 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 2756 bytes
+QUOTA PEAK PAGED USAGE: 83076 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: MemeoDashboard.exe
+PROCESS ID: 5632
+THREAD COUNT: 20
+PARENT PROCESS ID: 4604
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 27055
+WORKING SET SIZE: 10653696 bytes
+PAGE FILE USAGE: 46039040 bytes
+PEAK PAGE FILE USAGE: 55177216 bytes
+PEAK WORKING SET SIZE: 50102272 bytes
+QUOTA NON PAGED POOL USAGE: 20676 bytes
+QUOTA PAGED POOL USAGE: 316196 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 22116 bytes
+QUOTA PEAK PAGED USAGE: 316516 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: WDDMStatus.exe
+PROCESS ID: 5684
+THREAD COUNT: 13
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 51685429
+WORKING SET SIZE: 5386240 bytes
+PAGE FILE USAGE: 12587008 bytes
+PEAK PAGE FILE USAGE: 12750848 bytes
+PEAK WORKING SET SIZE: 19865600 bytes
+QUOTA NON PAGED POOL USAGE: 15172 bytes
+QUOTA PAGED POOL USAGE: 252676 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 16452 bytes
+QUOTA PEAK PAGED USAGE: 255076 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: PreferencesManager.exe
+PROCESS ID: 5752
+THREAD COUNT: 2
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 892388
+WORKING SET SIZE: 2740224 bytes
+PAGE FILE USAGE: 1490944 bytes
+PEAK PAGE FILE USAGE: 1613824 bytes
+PEAK WORKING SET SIZE: 5750784 bytes
+QUOTA NON PAGED POOL USAGE: 4400 bytes
+QUOTA PAGED POOL USAGE: 124068 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 4880 bytes
+QUOTA PEAK PAGED USAGE: 140308 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: Power2GoExpress8.exe
+PROCESS ID: 5748
+THREAD COUNT: 5
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 95407
+WORKING SET SIZE: 6033408 bytes
+PAGE FILE USAGE: 22163456 bytes
+PEAK PAGE FILE USAGE: 23035904 bytes
+PEAK WORKING SET SIZE: 33284096 bytes
+QUOTA NON PAGED POOL USAGE: 15712 bytes
+QUOTA PAGED POOL USAGE: 223196 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 17024 bytes
+QUOTA PEAK PAGED USAGE: 232428 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: ddm.exe
+PROCESS ID: 5812
+THREAD COUNT: 8
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 83594
+WORKING SET SIZE: 1810432 bytes
+PAGE FILE USAGE: 6356992 bytes
+PEAK PAGE FILE USAGE: 9781248 bytes
+PEAK WORKING SET SIZE: 13570048 bytes
+QUOTA NON PAGED POOL USAGE: 8736 bytes
+QUOTA PAGED POOL USAGE: 160348 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 11504 bytes
+QUOTA PEAK PAGED USAGE: 197100 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: SSScheduler.exe
+PROCESS ID: 4640
+THREAD COUNT: 4
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 2921
+WORKING SET SIZE: 2711552 bytes
+PAGE FILE USAGE: 2514944 bytes
+PEAK PAGE FILE USAGE: 2732032 bytes
+PEAK WORKING SET SIZE: 8740864 bytes
+QUOTA NON PAGED POOL USAGE: 7824 bytes
+QUOTA PAGED POOL USAGE: 118700 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 9696 bytes
+QUOTA PEAK PAGED USAGE: 130396 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: WNA1100.exe
+PROCESS ID: 5532
+THREAD COUNT: 18
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 13592
+WORKING SET SIZE: 4939776 bytes
+PAGE FILE USAGE: 16396288 bytes
+PEAK PAGE FILE USAGE: 16465920 bytes
+PEAK WORKING SET SIZE: 34181120 bytes
+QUOTA NON PAGED POOL USAGE: 13468 bytes
+QUOTA PAGED POOL USAGE: 337988 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 14020 bytes
+QUOTA PEAK PAGED USAGE: 338780 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: WmiPrvSE.exe
+PROCESS ID: 4572
+THREAD COUNT: 9
+PARENT PROCESS ID: 880
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+NOT ABLE TO ACCESS SESSION ID OF PROCESS
+
+===============================================================
+
+===============================================================
+PROCESS NAME: Dropbox.exe
+PROCESS ID: 1616
+THREAD COUNT: 55
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 116313
+WORKING SET SIZE: 45887488 bytes
+PAGE FILE USAGE: 132968448 bytes
+PEAK PAGE FILE USAGE: 132984832 bytes
+PEAK WORKING SET SIZE: 123285504 bytes
+QUOTA NON PAGED POOL USAGE: 111664 bytes
+QUOTA PAGED POOL USAGE: 308412 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 116672 bytes
+QUOTA PEAK PAGED USAGE: 564124 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 5620
+THREAD COUNT: 15
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: WmiPrvSE.exe
+PROCESS ID: 5216
+THREAD COUNT: 6
+PARENT PROCESS ID: 880
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+NOT ABLE TO ACCESS SESSION ID OF PROCESS
+
+===============================================================
+
+===============================================================
+PROCESS NAME: devenv.exe
+PROCESS ID: 6300
+THREAD COUNT: 28
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 927725
+WORKING SET SIZE: 150851584 bytes
+PAGE FILE USAGE: 178544640 bytes
+PEAK PAGE FILE USAGE: 187850752 bytes
+PEAK WORKING SET SIZE: 163811328 bytes
+QUOTA NON PAGED POOL USAGE: 42104 bytes
+QUOTA PAGED POOL USAGE: 819692 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 44064 bytes
+QUOTA PEAK PAGED USAGE: 842332 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: wmpnetwk.exe
+PROCESS ID: 6416
+THREAD COUNT: 12
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: conhost.exe
+PROCESS ID: 7800
+THREAD COUNT: 2
+PARENT PROCESS ID: 648
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 1112
+WORKING SET SIZE: 1798144 bytes
+PAGE FILE USAGE: 1060864 bytes
+PEAK PAGE FILE USAGE: 1073152 bytes
+PEAK WORKING SET SIZE: 4083712 bytes
+QUOTA NON PAGED POOL USAGE: 3480 bytes
+QUOTA PAGED POOL USAGE: 88724 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 3540 bytes
+QUOTA PEAK PAGED USAGE: 105452 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: svchost.exe
+PROCESS ID: 7992
+THREAD COUNT: 4
+PARENT PROCESS ID: 692
+PRIORITY BASE: 6
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: HipServAgent.exe
+PROCESS ID: 8148
+THREAD COUNT: 3
+PARENT PROCESS ID: 5632
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 2300
+WORKING SET SIZE: 2404352 bytes
+PAGE FILE USAGE: 4018176 bytes
+PEAK PAGE FILE USAGE: 4018176 bytes
+PEAK WORKING SET SIZE: 8835072 bytes
+QUOTA NON PAGED POOL USAGE: 6244 bytes
+QUOTA PAGED POOL USAGE: 121620 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 7356 bytes
+QUOTA PEAK PAGED USAGE: 121844 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: TeamViewer.exe
+PROCESS ID: 5432
+THREAD COUNT: 23
+PARENT PROCESS ID: 3176
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 30585
+WORKING SET SIZE: 13844480 bytes
+PAGE FILE USAGE: 27783168 bytes
+PEAK PAGE FILE USAGE: 27836416 bytes
+PEAK WORKING SET SIZE: 43311104 bytes
+QUOTA NON PAGED POOL USAGE: 26012 bytes
+QUOTA PAGED POOL USAGE: 398444 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 30108 bytes
+QUOTA PEAK PAGED USAGE: 400732 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: tv_w32.exe
+PROCESS ID: 7060
+THREAD COUNT: 2
+PARENT PROCESS ID: 3176
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: sppsvc.exe
+PROCESS ID: 7716
+THREAD COUNT: 4
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: wuauclt.exe
+PROCESS ID: 7644
+THREAD COUNT: 3
+PARENT PROCESS ID: 1260
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 1898
+WORKING SET SIZE: 2670592 bytes
+PAGE FILE USAGE: 1425408 bytes
+PEAK PAGE FILE USAGE: 1527808 bytes
+PEAK WORKING SET SIZE: 5591040 bytes
+QUOTA NON PAGED POOL USAGE: 4700 bytes
+QUOTA PAGED POOL USAGE: 117748 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 5700 bytes
+QUOTA PEAK PAGED USAGE: 157452 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: iTunes.exe
+PROCESS ID: 1448
+THREAD COUNT: 32
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 2152143
+WORKING SET SIZE: 69885952 bytes
+PAGE FILE USAGE: 122789888 bytes
+PEAK PAGE FILE USAGE: 171966464 bytes
+PEAK WORKING SET SIZE: 108060672 bytes
+QUOTA NON PAGED POOL USAGE: 44132 bytes
+QUOTA PAGED POOL USAGE: 572844 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 46708 bytes
+QUOTA PEAK PAGED USAGE: 575364 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: iPodService.exe
+PROCESS ID: 4200
+THREAD COUNT: 12
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: AppleMobileDeviceHelper.exe
+PROCESS ID: 2716
+THREAD COUNT: 2
+PARENT PROCESS ID: 1448
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 5293
+WORKING SET SIZE: 4489216 bytes
+PAGE FILE USAGE: 3563520 bytes
+PEAK PAGE FILE USAGE: 3563520 bytes
+PEAK WORKING SET SIZE: 12455936 bytes
+QUOTA NON PAGED POOL USAGE: 7544 bytes
+QUOTA PAGED POOL USAGE: 182388 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 8244 bytes
+QUOTA PEAK PAGED USAGE: 182460 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: conhost.exe
+PROCESS ID: 5876
+THREAD COUNT: 1
+PARENT PROCESS ID: 648
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 723
+WORKING SET SIZE: 2179072 bytes
+PAGE FILE USAGE: 708608 bytes
+PEAK PAGE FILE USAGE: 724992 bytes
+PEAK WORKING SET SIZE: 2732032 bytes
+QUOTA NON PAGED POOL USAGE: 2340 bytes
+QUOTA PAGED POOL USAGE: 62604 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 2400 bytes
+QUOTA PEAK PAGED USAGE: 78804 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: distnoted.exe
+PROCESS ID: 5028
+THREAD COUNT: 1
+PARENT PROCESS ID: 2716
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 1298
+WORKING SET SIZE: 2605056 bytes
+PAGE FILE USAGE: 1449984 bytes
+PEAK PAGE FILE USAGE: 1449984 bytes
+PEAK WORKING SET SIZE: 5054464 bytes
+QUOTA NON PAGED POOL USAGE: 3856 bytes
+QUOTA PAGED POOL USAGE: 134596 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 3856 bytes
+QUOTA PEAK PAGED USAGE: 134596 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: conhost.exe
+PROCESS ID: 1156
+THREAD COUNT: 1
+PARENT PROCESS ID: 648
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 721
+WORKING SET SIZE: 2174976 bytes
+PAGE FILE USAGE: 712704 bytes
+PEAK PAGE FILE USAGE: 729088 bytes
+PEAK WORKING SET SIZE: 2732032 bytes
+QUOTA NON PAGED POOL USAGE: 2340 bytes
+QUOTA PAGED POOL USAGE: 62604 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 2400 bytes
+QUOTA PEAK PAGED USAGE: 78804 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: MoboRobo PC Suite.exe
+PROCESS ID: 4156
+THREAD COUNT: 44
+PARENT PROCESS ID: 5960
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 25394531
+WORKING SET SIZE: 25989120 bytes
+PAGE FILE USAGE: 270286848 bytes
+PEAK PAGE FILE USAGE: 295567360 bytes
+PEAK WORKING SET SIZE: 143884288 bytes
+QUOTA NON PAGED POOL USAGE: 136896 bytes
+QUOTA PAGED POOL USAGE: 1059148 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 990452 bytes
+QUOTA PEAK PAGED USAGE: 1108436 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: MoboRoboDeviceService.exe
+PROCESS ID: 7224
+THREAD COUNT: 15
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: AndroidInterface.exe
+PROCESS ID: 2844
+THREAD COUNT: 4
+PARENT PROCESS ID: 4156
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 28387
+WORKING SET SIZE: 3743744 bytes
+PAGE FILE USAGE: 2310144 bytes
+PEAK PAGE FILE USAGE: 2322432 bytes
+PEAK WORKING SET SIZE: 6201344 bytes
+QUOTA NON PAGED POOL USAGE: 5412 bytes
+QUOTA PAGED POOL USAGE: 119276 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 199548 bytes
+QUOTA PEAK PAGED USAGE: 133604 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: conhost.exe
+PROCESS ID: 5564
+THREAD COUNT: 1
+PARENT PROCESS ID: 648
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 694
+WORKING SET SIZE: 2220032 bytes
+PAGE FILE USAGE: 708608 bytes
+PEAK PAGE FILE USAGE: 745472 bytes
+PEAK WORKING SET SIZE: 2781184 bytes
+QUOTA NON PAGED POOL USAGE: 2340 bytes
+QUOTA PAGED POOL USAGE: 62604 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 2400 bytes
+QUOTA PEAK PAGED USAGE: 78804 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: MoboRoboWeb.exe
+PROCESS ID: 3004
+THREAD COUNT: 2
+PARENT PROCESS ID: 4156
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 50796738
+WORKING SET SIZE: 2826240 bytes
+PAGE FILE USAGE: 995328 bytes
+PEAK PAGE FILE USAGE: 1150976 bytes
+PEAK WORKING SET SIZE: 4030464 bytes
+QUOTA NON PAGED POOL USAGE: 3420 bytes
+QUOTA PAGED POOL USAGE: 69332 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 3540 bytes
+QUOTA PEAK PAGED USAGE: 69556 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: taskhost.exe
+PROCESS ID: 5136
+THREAD COUNT: 6
+PARENT PROCESS ID: 692
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 2389
+WORKING SET SIZE: 5226496 bytes
+PAGE FILE USAGE: 5279744 bytes
+PEAK PAGE FILE USAGE: 5566464 bytes
+PEAK WORKING SET SIZE: 8667136 bytes
+QUOTA NON PAGED POOL USAGE: 8356 bytes
+QUOTA PAGED POOL USAGE: 117900 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 12424 bytes
+QUOTA PEAK PAGED USAGE: 120460 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: notepad.exe
+PROCESS ID: 8744
+THREAD COUNT: 2
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 1610
+WORKING SET SIZE: 4755456 bytes
+PAGE FILE USAGE: 1265664 bytes
+PEAK PAGE FILE USAGE: 1531904 bytes
+PEAK WORKING SET SIZE: 5648384 bytes
+QUOTA NON PAGED POOL USAGE: 3760 bytes
+QUOTA PAGED POOL USAGE: 114860 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 4612 bytes
+QUOTA PEAK PAGED USAGE: 137292 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: audiodg.exe
+PROCESS ID: 8736
+THREAD COUNT: 8
+PARENT PROCESS ID: 1160
+PRIORITY BASE: 8
+ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = 5
+PROCESS SESSION ID: 0
+
+===============================================================
+
+===============================================================
+PROCESS NAME: devenv.exe
+PROCESS ID: 7348
+THREAD COUNT: 20
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 97136
+WORKING SET SIZE: 76582912 bytes
+PAGE FILE USAGE: 139776000 bytes
+PEAK PAGE FILE USAGE: 157716480 bytes
+PEAK WORKING SET SIZE: 162570240 bytes
+QUOTA NON PAGED POOL USAGE: 34716 bytes
+QUOTA PAGED POOL USAGE: 794964 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 37928 bytes
+QUOTA PEAK PAGED USAGE: 842108 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: cmd.exe
+PROCESS ID: 9296
+THREAD COUNT: 1
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 697
+WORKING SET SIZE: 2088960 bytes
+PAGE FILE USAGE: 1863680 bytes
+PEAK PAGE FILE USAGE: 1863680 bytes
+PEAK WORKING SET SIZE: 2437120 bytes
+QUOTA NON PAGED POOL USAGE: 2340 bytes
+QUOTA PAGED POOL USAGE: 62564 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 2840 bytes
+QUOTA PEAK PAGED USAGE: 62564 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: conhost.exe
+PROCESS ID: 8236
+THREAD COUNT: 2
+PARENT PROCESS ID: 648
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 1353
+WORKING SET SIZE: 4206592 bytes
+PAGE FILE USAGE: 1093632 bytes
+PEAK PAGE FILE USAGE: 1093632 bytes
+PEAK WORKING SET SIZE: 4685824 bytes
+QUOTA NON PAGED POOL USAGE: 3540 bytes
+QUOTA PAGED POOL USAGE: 89796 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 3600 bytes
+QUOTA PEAK PAGED USAGE: 105924 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: firefox.exe
+PROCESS ID: 4328
+THREAD COUNT: 53
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 2578624
+WORKING SET SIZE: 615911424 bytes
+PAGE FILE USAGE: 692256768 bytes
+PEAK PAGE FILE USAGE: 723079168 bytes
+PEAK WORKING SET SIZE: 644702208 bytes
+QUOTA NON PAGED POOL USAGE: 69492 bytes
+QUOTA PAGED POOL USAGE: 795988 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 530024 bytes
+QUOTA PEAK PAGED USAGE: 952820 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: recordingmanager.exe
+PROCESS ID: 8492
+THREAD COUNT: 5
+PARENT PROCESS ID: 4328
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 2128
+WORKING SET SIZE: 5427200 bytes
+PAGE FILE USAGE: 2289664 bytes
+PEAK PAGE FILE USAGE: 2400256 bytes
+PEAK WORKING SET SIZE: 8163328 bytes
+QUOTA NON PAGED POOL USAGE: 5364 bytes
+QUOTA PAGED POOL USAGE: 121380 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 5844 bytes
+QUOTA PEAK PAGED USAGE: 121692 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: plugin-container.exe
+PROCESS ID: 8796
+THREAD COUNT: 4
+PARENT PROCESS ID: 4328
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 3509
+WORKING SET SIZE: 9801728 bytes
+PAGE FILE USAGE: 9359360 bytes
+PEAK PAGE FILE USAGE: 9408512 bytes
+PEAK WORKING SET SIZE: 12644352 bytes
+QUOTA NON PAGED POOL USAGE: 8504 bytes
+QUOTA PAGED POOL USAGE: 275108 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 8984 bytes
+QUOTA PEAK PAGED USAGE: 276436 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: plugin-container.exe
+PROCESS ID: 672
+THREAD COUNT: 4
+PARENT PROCESS ID: 4328
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 8444
+WORKING SET SIZE: 12439552 bytes
+PAGE FILE USAGE: 12513280 bytes
+PEAK PAGE FILE USAGE: 15495168 bytes
+PEAK WORKING SET SIZE: 15687680 bytes
+QUOTA NON PAGED POOL USAGE: 8804 bytes
+QUOTA PAGED POOL USAGE: 275348 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 9148 bytes
+QUOTA PEAK PAGED USAGE: 276676 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: plugin-container.exe
+PROCESS ID: 7940
+THREAD COUNT: 4
+PARENT PROCESS ID: 4328
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 3585
+WORKING SET SIZE: 10035200 bytes
+PAGE FILE USAGE: 9498624 bytes
+PEAK PAGE FILE USAGE: 9535488 bytes
+PEAK WORKING SET SIZE: 12939264 bytes
+QUOTA NON PAGED POOL USAGE: 8504 bytes
+QUOTA PAGED POOL USAGE: 275604 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 8864 bytes
+QUOTA PEAK PAGED USAGE: 276932 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: ApplePhotoStreams.exe
+PROCESS ID: 10080
+THREAD COUNT: 6
+PARENT PROCESS ID: 880
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 8137
+WORKING SET SIZE: 5763072 bytes
+PAGE FILE USAGE: 15847424 bytes
+PEAK PAGE FILE USAGE: 15941632 bytes
+PEAK WORKING SET SIZE: 24891392 bytes
+QUOTA NON PAGED POOL USAGE: 9944 bytes
+QUOTA PAGED POOL USAGE: 229388 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 10424 bytes
+QUOTA PEAK PAGED USAGE: 229564 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: vlc.exe
+PROCESS ID: 7016
+THREAD COUNT: 8
+PARENT PROCESS ID: 2080
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 88045
+WORKING SET SIZE: 30904320 bytes
+PAGE FILE USAGE: 47906816 bytes
+PEAK PAGE FILE USAGE: 117858304 bytes
+PEAK WORKING SET SIZE: 95805440 bytes
+QUOTA NON PAGED POOL USAGE: 14324 bytes
+QUOTA PAGED POOL USAGE: 250708 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 19544 bytes
+QUOTA PEAK PAGED USAGE: 328684 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: vcpkgsrv.exe
+PROCESS ID: 3836
+THREAD COUNT: 6
+PARENT PROCESS ID: 6300
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 168395
+WORKING SET SIZE: 34107392 bytes
+PAGE FILE USAGE: 39620608 bytes
+PEAK PAGE FILE USAGE: 41332736 bytes
+PEAK WORKING SET SIZE: 44711936 bytes
+QUOTA NON PAGED POOL USAGE: 36380 bytes
+QUOTA PAGED POOL USAGE: 173076 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 36500 bytes
+QUOTA PEAK PAGED USAGE: 173108 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: vcpkgsrv.exe
+PROCESS ID: 3876
+THREAD COUNT: 4
+PARENT PROCESS ID: 7348
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 8255
+WORKING SET SIZE: 15048704 bytes
+PAGE FILE USAGE: 38793216 bytes
+PEAK PAGE FILE USAGE: 39661568 bytes
+PEAK WORKING SET SIZE: 15163392 bytes
+QUOTA NON PAGED POOL USAGE: 33620 bytes
+QUOTA PAGED POOL USAGE: 167700 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 34220 bytes
+QUOTA PEAK PAGED USAGE: 169764 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: MSBuild.exe
+PROCESS ID: 8216
+THREAD COUNT: 7
+PARENT PROCESS ID: 6300
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 6920
+WORKING SET SIZE: 27381760 bytes
+PAGE FILE USAGE: 21454848 bytes
+PEAK PAGE FILE USAGE: 21643264 bytes
+PEAK WORKING SET SIZE: 27402240 bytes
+QUOTA NON PAGED POOL USAGE: 7540 bytes
+QUOTA PAGED POOL USAGE: 229124 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 26016 bytes
+QUOTA PEAK PAGED USAGE: 231932 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: conhost.exe
+PROCESS ID: 7852
+THREAD COUNT: 1
+PARENT PROCESS ID: 648
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 690
+WORKING SET SIZE: 2826240 bytes
+PAGE FILE USAGE: 724992 bytes
+PEAK PAGE FILE USAGE: 737280 bytes
+PEAK WORKING SET SIZE: 2826240 bytes
+QUOTA NON PAGED POOL USAGE: 2340 bytes
+QUOTA PAGED POOL USAGE: 62604 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 2400 bytes
+QUOTA PEAK PAGED USAGE: 78804 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: mspdbsrv.exe
+PROCESS ID: 2004
+THREAD COUNT: 5
+PARENT PROCESS ID: 2380
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 1512
+WORKING SET SIZE: 3219456 bytes
+PAGE FILE USAGE: 1249280 bytes
+PEAK PAGE FILE USAGE: 2441216 bytes
+PEAK WORKING SET SIZE: 4358144 bytes
+QUOTA NON PAGED POOL USAGE: 2660 bytes
+QUOTA PAGED POOL USAGE: 19684 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 2720 bytes
+QUOTA PEAK PAGED USAGE: 19876 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: dllhost.exe
+PROCESS ID: 6936
+THREAD COUNT: 6
+PARENT PROCESS ID: 880
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 1150
+WORKING SET SIZE: 4173824 bytes
+PAGE FILE USAGE: 1179648 bytes
+PEAK PAGE FILE USAGE: 1179648 bytes
+PEAK WORKING SET SIZE: 4177920 bytes
+QUOTA NON PAGED POOL USAGE: 3760 bytes
+QUOTA PAGED POOL USAGE: 95300 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 3820 bytes
+QUOTA PEAK PAGED USAGE: 95852 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================
+
+===============================================================
+PROCESS NAME: ConsoleConsumeDLL.exe
+PROCESS ID: 7104
+THREAD COUNT: 1
+PARENT PROCESS ID: 9296
+PRIORITY BASE: 8
+PAGE FAULT COUNT: 1900
+WORKING SET SIZE: 2625536 bytes
+PAGE FILE USAGE: 884736 bytes
+PEAK PAGE FILE USAGE: 974848 bytes
+PEAK WORKING SET SIZE: 2691072 bytes
+QUOTA NON PAGED POOL USAGE: 2540 bytes
+QUOTA PAGED POOL USAGE: 54948 bytes
+QUOTA PEAK NON PAGED POOL USAGE: 2600 bytes
+QUOTA PEAK PAGED USAGE: 55124 bytes
+PROCESS USER NAME: Garud\Harsha
+PROCESS SESSION ID: 1
+
+===============================================================

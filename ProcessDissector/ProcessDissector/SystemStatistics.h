@@ -4,10 +4,15 @@
 #include<Windows.h>
 #include<stdio.h>
 #include<string.h>
+#include <tlhelp32.h>
 #include "Shlwapi.h"
+#include "psapi.h"
+
+#define MAX_NAME 256
 
 
 extern "C" __declspec(dllexport) int ListFiles(char* strOption);
+extern "C" __declspec(dllexport) int TakeProcessSnapshotOfSystem();
 
 typedef struct structFileFolder
 {

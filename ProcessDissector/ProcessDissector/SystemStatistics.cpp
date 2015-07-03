@@ -788,3 +788,317 @@ WCHAR* GetDateTimeStringFromSystemTime(SYSTEMTIME* sysTime, WCHAR* strDateTime)
 
 	return strDateTime;
 }
+
+
+//PID
+//User Name
+//Session ID
+//CPU Usage
+//CPU Time
+//Memory - Working Set
+//Memory - Peak Working Set
+//Memory - Working Set Delta
+//Memory - Private Working Set
+//Memory - Commit Size
+//Memory - Paged Pool
+//Memory - Non Paged pool
+//Page Faults
+//Page Fault Delta
+//Base Priority
+//Handles
+//Threads
+//User Objects
+//GDI Objects
+//I/O Reads
+//I/O Writes
+//I/O Other
+//I/O Read Bytes
+//I/O Write Bytes
+//I/O Other Bytes
+//Image Path Name
+//Command Line
+//User Account Control Virtualization
+//Description
+//Data Exectuion prevention
+//Company Name
+//Verified Signer
+//Version
+//Image Type - 64 vs 32
+//Package Name
+//Window Title
+//Window Status
+//Start Time
+//CPU Cycles
+//CPU Cycles Delta
+//Context Switches
+//Context Swtich Delta
+//I/O Delta Reads
+//I/O Delta Reads Byte
+//I/O Delta Writes
+//I/O Delta Writes Byte
+//I/O Delta Others
+//I/O Delta Others Byte
+//GPU Usage
+//GPU Dedicated Bytes
+//GPU Committed Bytes
+//GPU System Bytes
+//DLL Description
+//DLL Version
+//DLL Timestamp
+//DLL Name
+//DLL Path
+//DLL Company Name
+//Dll Verified Signer
+//DLL Image Base Address
+//DLL Base Address
+//DLL Mapped Size
+//DLL Mapping Type
+//DLL WS Total Bytes
+//DLL WS Private Bytes
+//DLL WS Shareable Bytes
+//DLL WS Shared Bytes
+//DLL Image Type
+//DLL ASLR Enabled
+
+/*
+*Name: TakeProcessSnapshotOfSystem
+*Description: This will list all the process which are currently running in the system. This will try to list all the information of those process also
+*ReturnValue: 0 For success else some error has occurred
+*/
+int TakeProcessSnapshotOfSystem()
+{
+	int nReturnValue = 0;
+
+	HANDLE hProcessSnap = NULL;
+	HANDLE hProcess = NULL;
+	HANDLE hToken = NULL;
+	PROCESSENTRY32 pe32;
+	PTOKEN_USER ptu = NULL;
+	DWORD dwLength = 0;
+	DWORD dwSize = MAX_NAME;
+	DWORD dwSizeGlobal = 0;
+	SID_NAME_USE SidType;
+    WCHAR lpName[MAX_NAME];
+    WCHAR lpDomain[MAX_NAME];
+	DWORD dwResult = 0;
+	DWORD dwSessionID = 0;
+	SIZE_T virtualMemUsedByMe = 0;
+
+	MEMORYSTATUSEX memInfo;
+	PROCESS_MEMORY_COUNTERS pmc;
+	PERFORMANCE_INFORMATION pfInfo;
+	pfInfo.cb = sizeof(PERFORMANCE_INFORMATION);
+	memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+    if(GlobalMemoryStatusEx(&memInfo))
+	{
+
+		wprintf(L"\n===================================================================================\n");
+		wprintf(L"TOTAL PHYSICAL MEMORY USAGE: %d\n", memInfo.dwMemoryLoad);
+		wprintf(L"PHYSICAL MEMORY: %u bytes\n", memInfo.ullTotalPhys);
+		wprintf(L"AVAILABLE PHYSICAL MEMORY: %u bytes\n", memInfo.ullAvailPhys);
+		wprintf(L"TOTAL VIRTUAl MEMORY (SWAP FILE + RAM): %u bytes\n", memInfo.ullTotalPageFile);
+		wprintf(L"MAXIMUM AMOUNT OF MEMORY PROCESS CAN COMMIT: %u bytes\n", memInfo.ullAvailPageFile);
+		wprintf(L"TOTAL VIRTUAL MEMORY CURRENTLY USED: %u bytes\n", memInfo.ullTotalPageFile - memInfo.ullAvailPageFile);
+		wprintf(L"USER-MODE PORTION OF VIRTUAL ADDRESS SPACE: %u bytes\n", memInfo.ullTotalVirtual);
+		wprintf(L"UNRESERVED AND UNCOMMITTED MEMORY IN USER MODE: %u bytes\n", memInfo.ullAvailVirtual);
+		wprintf(L"\n===================================================================================\n");
+	}
+	else
+	{
+		wprintf(L"\nGlobal memory related information not available\n");
+	}
+
+	if(GetPerformanceInfo(&pfInfo, sizeof(PERFORMANCE_INFORMATION)))
+	{
+		wprintf(L"\n======================================================================================\n");
+		wprintf(L"TOTAL PAGES COMMITTED BY SYSTEM: %d\n", pfInfo.CommitTotal);
+		wprintf(L"MAX NUMBER OF PAGES CAN BE COMMITTED: %d\n", pfInfo.CommitLimit);
+		wprintf(L"MAX NUMBER OF PAGES IN COMMIT STATE: %d\n", pfInfo.CommitPeak);
+		wprintf(L"AMOUNT OF ACTUAL PHYSICAL MEMORY IN PAGES: %u\n", pfInfo.PhysicalTotal);
+		wprintf(L"AMOUNT OF AVAILABLE PHYSICAL MEMORY IN PAGES: %u\n", pfInfo.PhysicalAvailable);
+		wprintf(L"SYSTEM CACHE IN PAGES: %u\n", pfInfo.SystemCache);
+		wprintf(L"MEMORY IN PAGED AND NONPAGED KERNEL POOLS IN PAGES: %u\n", pfInfo.KernelTotal);
+		wprintf(L"MEMORY IN PAGED KERNEL POOL IN PAGES: %u\n", pfInfo.KernelPaged);
+		wprintf(L"MEMORY IN NON PAGED KERNEL POOL IN PAGES: %u\n", pfInfo.KernelNonpaged);
+		wprintf(L"SIZE OF PAGE: %d bytes\n", pfInfo.PageSize);
+		wprintf(L"HANDLE COUNT: %d\n", pfInfo.HandleCount);
+		wprintf(L"PROCESS COUNT: %d\n", pfInfo.ProcessCount);
+		wprintf(L"THREAD COUNT: %d\n", pfInfo.ThreadCount);
+		wprintf(L"\n======================================================================================\n");
+	}
+	else
+	{
+		wprintf(L"\nPerformance Related information not available\n");
+	}
+	
+	hProcessSnap = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
+	if( hProcessSnap == INVALID_HANDLE_VALUE )
+	{
+		wprintf(L"Error while getting snapshot of the processes in system\n");
+		nReturnValue = -1;
+		return nReturnValue;
+	}
+
+	pe32.dwSize = sizeof( PROCESSENTRY32 );
+
+	if( !Process32First( hProcessSnap, &pe32 ) )
+	{
+		wprintf(L"Error while getting the first process from snapshot\n");
+		CloseHandle( hProcessSnap );          // clean the snapshot object
+		return( FALSE );
+	}
+
+	wprintf(L"\nList Of Processes and its details\n\n");
+	do
+	{
+		dwResult = 0;
+		dwSize = MAX_NAME;
+		dwLength = 0;
+
+		memset(lpName, '\0', MAX_NAME);
+		memset(lpDomain, '\0', MAX_NAME);
+
+		wprintf(L"\n===============================================================\n");
+		wprintf(L"PROCESS NAME: %s\n", pe32.szExeFile);
+		wprintf(L"PROCESS ID: %d\n", pe32.th32ProcessID);
+		wprintf(L"THREAD COUNT: %d\n", pe32.cntThreads);
+		wprintf(L"PARENT PROCESS ID: %d\n", pe32.th32ParentProcessID);
+		wprintf(L"PRIORITY BASE: %d\n", pe32.pcPriClassBase);
+
+		hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, pe32.th32ProcessID );
+		//hProcess = OpenProcess( PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID );
+		if(NULL == hProcess)
+		{
+			dwResult = GetLastError();
+			wprintf(L"ERROR!! Cannot retrieve further information about the process, ERROR NUMBER = %d\n",dwResult);
+			
+		}
+		else
+		{
+			if( !OpenProcessToken( hProcess, TOKEN_QUERY, &hToken ) )
+			{
+				dwResult = GetLastError();
+				wprintf(L"ERROR!! Failed to open the token information of process, ERROR NUMBER = %d\n",dwResult);
+				
+				
+				
+			}
+			else
+			{
+
+				
+				if(GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc)))
+				{
+					wprintf(L"PAGE FAULT COUNT: %d\n", pmc.PageFaultCount);
+					wprintf(L"WORKING SET SIZE: %d bytes\n", pmc.WorkingSetSize);
+					wprintf(L"PAGE FILE USAGE: %d bytes\n", pmc.PagefileUsage);
+					wprintf(L"PEAK PAGE FILE USAGE: %d bytes\n", pmc.PeakPagefileUsage);
+					wprintf(L"PEAK WORKING SET SIZE: %d bytes\n", pmc.PeakWorkingSetSize);
+					wprintf(L"QUOTA NON PAGED POOL USAGE: %d bytes\n", pmc.QuotaNonPagedPoolUsage);
+					wprintf(L"QUOTA PAGED POOL USAGE: %d bytes\n", pmc.QuotaPagedPoolUsage);
+					wprintf(L"QUOTA PEAK NON PAGED POOL USAGE: %d bytes\n", pmc.QuotaPeakNonPagedPoolUsage);
+					wprintf(L"QUOTA PEAK PAGED USAGE: %d bytes\n", pmc.QuotaPeakPagedPoolUsage);
+					
+				}
+				else
+				{
+					wprintf(L"ERROR!! Not able to get process memory related information\n");
+				}
+				
+
+				if(!GetTokenInformation(hToken, TokenUser, (LPVOID) ptu, 0, &dwLength ))
+				//if(!GetTokenInformation(hToken, TokenUser, ptu, sizeof(TOKEN_USER), &dwLength ))
+				{
+					dwResult = GetLastError();
+
+					if(ERROR_INSUFFICIENT_BUFFER != dwResult)
+					{
+						wprintf(L"ERROR!! Faled to get the token information of process, ERROR NUMBER = %d\n",dwResult);
+					}
+					else
+					{
+						ptu = (PTOKEN_USER)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwLength);
+						if(NULL == ptu)
+						{
+							//Error
+							dwResult = GetLastError();
+							wprintf(L"ERROR!!while allocating memory to Token User, ERROR NUMBER = %d\n",dwResult);
+						
+						}
+						else
+						{
+							if(!GetTokenInformation( hToken, TokenUser, (LPVOID) ptu, dwLength, &dwLength )) 
+							{
+								//ERROR
+								dwResult = GetLastError();
+								wprintf(L"ERROR!! not able to get token informaation for process, ERROR NUMBER = %d\n",dwResult);
+							
+							}
+							else
+							{
+								if( !LookupAccountSid( NULL , ptu->User.Sid, lpName, &dwSize, lpDomain, &dwSize, &SidType ) )                                    
+								{
+									dwResult = GetLastError();
+									if( dwResult == ERROR_NONE_MAPPED )
+									{
+									   wcscpy(lpName, L"NONE_MAPPED" );
+									   wprintf(L"PROCESS USER NAME: %s\n", lpName);
+									}
+									else 
+									{
+										wprintf(L"LookupAccountSid Error %u\n", GetLastError());
+									}
+								}
+								else
+								{
+									wprintf(L"PROCESS USER NAME: %s\\%s\n",lpDomain, lpName);
+								
+								}
+
+							}
+						}
+
+						if(NULL != ptu)
+						{
+							HeapFree(GetProcessHeap(), 0, (LPVOID)ptu);
+							ptu = NULL;
+						}
+
+					}
+
+
+					
+				}
+				else
+				{
+					
+				}
+			}
+			if(NULL != hToken)
+			{
+				CloseHandle(hToken);
+				hToken = NULL;
+			}
+			if(NULL != hProcess)
+			{
+				CloseHandle(hProcess);
+				hProcess = NULL;
+			}
+		}
+
+		if(ProcessIdToSessionId(pe32.th32ProcessID, &dwSessionID))
+		{
+			wprintf(L"PROCESS SESSION ID: %d\n", dwSessionID);
+		}
+		else
+		{
+			wprintf(L"NOT ABLE TO ACCESS SESSION ID OF PROCESS\n");
+		}
+
+		wprintf(L"\n===============================================================\n");
+
+	}while(Process32Next( hProcessSnap, &pe32 ));
+
+	CloseHandle( hProcessSnap );
+	return nReturnValue;
+}

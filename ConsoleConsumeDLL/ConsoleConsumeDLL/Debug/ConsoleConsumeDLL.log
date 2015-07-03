@@ -1,4 +1,4 @@
-﻿Build started 28-Jun-15 3:48:35 AM.
+﻿Build started 03-Jul-15 6:07:09 PM.
      1>Project "E:\Coding\Projects\Disassembler\ConsoleConsumeDLL\ConsoleConsumeDLL\ConsoleConsumeDLL.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\ConsoleConsumeDLL.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -23,4 +23,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.40
+Time Elapsed 00:00:02.74

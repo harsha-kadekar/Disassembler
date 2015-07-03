@@ -11,6 +11,7 @@ int main(int argc, char** argv)
 	int nReturnValue = 0;
 	HMODULE hDll = NULL;
 	FunctionPTR ParsePEFile = NULL, ListFiles = NULL;
+	FunctionPTR2 Snapshot = NULL;
 	char* strFileName = NULL;
 
 	/*if(argc != 2)
@@ -48,13 +49,23 @@ int main(int argc, char** argv)
 	strFileName = argv[1];
 	nReturnValue = ParsePEFile(strFileName);*/
 
-	ListFiles = (FunctionPTR)GetProcAddress(hDll, "ListFiles");
+	/*ListFiles = (FunctionPTR)GetProcAddress(hDll, "ListFiles");
 	if(NULL == ListFiles)
 	{
 		printf("Failed to get the function ListFiles");
 		FreeLibrary(hDll);
 		return -3;
+	}*/
+
+	Snapshot = (FunctionPTR2)GetProcAddress(hDll, "TakeProcessSnapshotOfSystem");
+	if(NULL == Snapshot)
+	{
+		printf("Failed to get the function TakeProcessSnapshotOfSystem");
+		FreeLibrary(hDll);
+		return -3;
 	}
+
+	nReturnValue = Snapshot();
 
 	/*printf("Waiting to be linked......\n");
 	Sleep(30000);
@@ -62,7 +73,7 @@ int main(int argc, char** argv)
 	
 	//nReturnValue = ListFiles("ALL");
 
-	nReturnValue = ListFiles("E:\\Coding\\");
+	//nReturnValue = ListFiles("E:\\Coding\\");
 
 	//nReturnValue = ListFiles("E:\\My Interests\\");
 
